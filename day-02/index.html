@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>岁候盘</title>
+<meta name="description" content="按太阳视黄经推算二十四节气和七十二候，并对照一座城市的昼夜。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%23f3ead7' width='16' height='16'/%3E%3Ccircle cx='8' cy='8' r='5.5' fill='none' stroke='%231b1714' stroke-width='1'/%3E%3Ccircle cx='8' cy='8' r='1.4' fill='%239d2f28'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --paper: #e9dfcc;
+    --paper-2: #f7f1e4;
+    --ink: #1b1714;
+    --soft: #5e564c;
+    --line: #c9b48a;
+    --cinnabar: #9d2f28;
+    --deep: #6f201c;
+    --spring: #1e5c49;
+    --summer: #9d2f28;
+    --autumn: #8a6232;
+    --winter: #24344c;
+    --shadow: 0 16px 40px rgba(48, 32, 14, 0.12);
+    --serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "PMingLiU", "SimSun", "WenQuanYi Micro Hei", "Droid Sans Fallback", serif;
+    --sans: "PingFang SC", "Source Han Sans SC", "Noto Sans CJK SC", "Microsoft YaHei", "WenQuanYi Micro Hei", "Droid Sans Fallback", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    background:
+      radial-gradient(980px 420px at 0% -10%, rgba(255, 252, 245, 0.9), transparent 55%),
+      radial-gradient(820px 480px at 110% 0%, rgba(157, 47, 40, 0.07), transparent 50%),
+      var(--paper);
+  }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .plate:focus-visible {
+    outline: 2px solid var(--cinnabar);
+    outline-offset: 2px;
+  }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 500; }
+  p { margin: 0; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 64px; }
+  header.top {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .seal {
+    width: 52px; height: 52px;
+    display: grid; place-items: center;
+    border: 2px solid var(--cinnabar);
+    color: var(--cinnabar);
+    font-family: var(--serif);
+    font-size: 28px;
+    transform: rotate(-8deg);
+  }
+  .eyebrow { letter-spacing: 0.22em; font-size: 13px; color: var(--cinnabar); margin-bottom: 4px; }
+  h1 { font-size: clamp(36px, 5vw, 56px); letter-spacing: 0.18em; margin: 0; line-height: 1.1; }
+  .lede { margin-top: 8px; color: var(--soft); max-width: 40em; }
+  .live {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 11em;
+  }
+  .live b { display: block; font-size: 22px; font-weight: 500; letter-spacing: 0.04em; }
+  .live span { color: var(--soft); font-size: 13px; }
+  .toolbar, .row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .toolbar { margin: 8px 0 14px; }
+  label.field { display: flex; flex-direction: column; gap: 3px; font-size: 13px; color: var(--soft); }
+  input[type="datetime-local"], select, input[type="search"] {
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+    min-height: 38px;
+    padding: 4px 8px;
+  }
+  button.btn {
+    background: transparent;
+    border: 1px solid var(--ink);
+    min-height: 38px;
+    padding: 6px 12px;
+  }
+  button.btn:hover { background: var(--ink); color: var(--paper-2); }
+  button.btn[aria-pressed="true"] { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff8ef; }
+  button.btn.primary { background: var(--cinnabar); border-color: var(--cinnabar); color: #fff8ef; }
+  button.btn.primary:hover { background: var(--deep); color: #fff8ef; }
+  .yearbox { display: flex; align-items: center; gap: 6px; }
+  .yearbox strong { font-family: var(--serif); font-size: 28px; letter-spacing: 0.08em; font-weight: 500; min-width: 4.2em; text-align: center; }
+  .banner {
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    background: var(--paper-2);
+    border-left: 4px solid var(--cinnabar);
+    box-shadow: var(--shadow);
+  }
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.82fr);
+    gap: 22px;
+    align-items: start;
+  }
+  .plate {
+    position: relative;
+    width: min(100%, 720px);
+    margin: 0 auto;
+    aspect-ratio: 1;
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+    box-shadow: 0 0 0 7px var(--paper-2), 0 0 0 8px var(--ink), var(--shadow);
+    touch-action: none;
+  }
+  canvas { width: 100%; height: 100%; display: block; }
+  .hub {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 34%;
+    text-align: center;
+    pointer-events: none;
+    font-family: var(--serif);
+  }
+  .hub-kicker { letter-spacing: 0.16em; font-size: 13px; color: var(--cinnabar); margin-bottom: 4px; }
+  .hub-name { font-size: clamp(18px, 3.2vw, 36px); letter-spacing: 0.12em; line-height: 1.25; margin: 0; }
+  .hub-name[data-len="5"], .hub-name[data-len="6"] { font-size: clamp(16px, 2.5vw, 26px); }
+  .hub-name[data-len="7"], .hub-name[data-len="8"] { font-size: clamp(14px, 2.1vw, 20px); letter-spacing: 0.04em; }
+  .hub-sub { margin-top: 6px; color: var(--soft); font-family: var(--sans); font-size: 13px; letter-spacing: 0; }
+  .legend { color: var(--soft); font-size: 13px; margin-top: 14px; max-width: 720px; }
+  .dossier {
+    background: var(--paper-2);
+    border-top: 4px solid var(--autumn);
+    box-shadow: var(--shadow);
+    padding: 22px 20px 18px;
+  }
+  .dossier h2 { font-size: clamp(32px, 4vw, 44px); letter-spacing: 0.14em; margin: 4px 0 8px; line-height: 1.2; }
+  .gloss { font-size: 17px; }
+  .brief { color: var(--soft); margin-top: 6px; }
+  .meter { height: 4px; background: rgba(27, 23, 20, 0.08); margin: 14px 0 6px; }
+  .meter > span { display: block; height: 100%; background: var(--cinnabar); width: 0; }
+  .meter-label { font-size: 13px; color: var(--soft); margin-bottom: 12px; }
+  .facts { display: grid; grid-template-columns: 4.8em 1fr; gap: 5px 10px; margin: 0 0 8px; }
+  .facts dt { color: var(--soft); }
+  .facts dd { margin: 0; }
+  .pace { margin: 8px 0 14px; }
+  .sunline { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px 12px; align-items: center; padding-top: 8px; border-top: 1px solid var(--line); }
+  .orbit { width: 150px; height: 150px; }
+  .orbit text { font-size: 12px; fill: var(--soft); font-family: var(--serif); }
+  .warn { color: var(--deep); font-size: 14px; margin-top: 8px; }
+  .note { margin-top: 14px; }
+  .note textarea {
+    width: 100%;
+    min-height: 78px;
+    resize: vertical;
+    background: transparent;
+    border: 1px solid var(--line);
+    padding: 8px;
+    margin-top: 4px;
+  }
+  .fine { color: var(--soft); font-size: 13px; margin-top: 4px; }
+  .slip {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    background: rgba(27, 23, 20, 0.03);
+    border: 1px dashed var(--line);
+    white-space: pre-wrap;
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .row { margin-top: 12px; }
+  .status { min-height: 1.2em; font-size: 13px; color: var(--spring); }
+  .insight, .almanac, .method {
+    margin-top: 26px;
+    background: var(--paper-2);
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+  }
+  .insight p { margin-top: 6px; }
+  .strip-wrap { margin-top: 22px; }
+  .strip-wrap h2, .almanac h2, .method summary { font-size: 20px; letter-spacing: 0.12em; }
+  .strip {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px 0 4px;
+    scroll-behavior: smooth;
+  }
+  .strip button {
+    flex: 0 0 auto;
+    min-width: 76px;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    padding: 6px 8px 7px;
+    text-align: left;
+  }
+  .strip button b { display: block; font-family: var(--serif); font-weight: 500; letter-spacing: 0.12em; }
+  .strip button span { color: var(--soft); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .strip button.on { border-color: var(--cinnabar); background: #fff8f4; }
+  .strip button.today b { color: var(--cinnabar); }
+  .list-head { display: flex; justify-content: space-between; gap: 12px; align-items: end; flex-wrap: wrap; }
+  .list-head input { min-width: min(100%, 220px); }
+  .term-block { margin-top: 16px; }
+  .term-block h3 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    letter-spacing: 0.14em;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 4px;
+  }
+  .term-block h3 span { letter-spacing: 0; color: var(--soft); font-family: var(--sans); font-size: 14px; flex: 1 1 16em; text-align: right; }
+  @media (max-width: 640px) {
+    .term-block h3 span { text-align: left; flex-basis: 100%; }
+  }
+  article.hou {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    padding: 8px 8px 8px 10px;
+    display: grid;
+    grid-template-columns: 3.2em minmax(0, 1fr) auto;
+    gap: 2px 10px;
+    align-items: baseline;
+  }
+  article.hou:hover { background: rgba(157, 47, 40, 0.05); }
+  article.hou.current { border-left-color: var(--cinnabar); background: rgba(157, 47, 40, 0.06); }
+  article.hou .tag { color: var(--soft); font-size: 13px; }
+  article.hou .nm { font-family: var(--serif); font-size: 18px; letter-spacing: 0.08em; }
+  article.hou .when { color: var(--soft); font-size: 13px; font-variant-numeric: tabular-nums; }
+  article.hou .gl { grid-column: 2 / -1; color: var(--soft); font-size: 14px; }
+  .method summary { cursor: pointer; }
+  .method p { margin-top: 8px; }
+  footer { margin-top: 28px; color: var(--soft); font-size: 14px; }
+  footer .poem { font-family: var(--serif); color: var(--ink); letter-spacing: 0.06em; margin-bottom: 6px; }
+  @media (max-width: 880px) {
+    header.top { grid-template-columns: auto 1fr; }
+    .live { grid-column: 1 / -1; text-align: left; }
+    .stage { grid-template-columns: 1fr; }
+    article.hou { grid-template-columns: 3.2em minmax(0, 1fr); }
+    article.hou .when { grid-column: 2; }
+  }
+  @media (max-width: 560px) {
+    .sunline { grid-template-columns: 1fr; }
+    .orbit { margin: 0 auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html, .strip { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="seal" aria-hidden="true">候</div>
+    <div>
+      <p class="eyebrow">定气 · 七十二候</p>
+      <h1>岁候盘</h1>
+      <p class="lede">太阳黄经每走十五度，交一个节气；每走五度，换一候。盘面从立春读起，顺时针走过春夏秋冬。</p>
+    </div>
+    <div class="live">
+      <b id="liveClock">--:--:--</b>
+      <span id="liveDate">东八区</span>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="yearbox">
+      <button class="btn" id="prevYear" type="button" aria-label="上一年">上一年</button>
+      <strong id="yearLabel">----</strong>
+      <button class="btn" id="nextYear" type="button" aria-label="下一年">下一年</button>
+    </div>
+    <label class="field">时刻（东八区）
+      <input id="when" type="datetime-local" step="60">
+    </label>
+    <button class="btn" id="now" type="button" aria-pressed="true">回到此刻</button>
+    <label class="field">看昼夜的城市
+      <select id="city"></select>
+    </label>
+  </div>
+
+  <p class="banner" id="banner" hidden></p>
+
+  <div class="stage">
+    <div>
+      <div class="plate" id="plate" tabindex="0" role="application" aria-label="岁候盘">
+        <canvas id="cv" width="640" height="640"></canvas>
+        <div class="hub" id="hub">
+          <p class="hub-kicker" id="hubKicker"></p>
+          <p class="hub-name" id="hubName"></p>
+          <p class="hub-sub" id="hubSub"></p>
+        </div>
+      </div>
+      <p class="legend">外环是节气，中环被朱红填上的是正在看的这一候，内环越厚白昼越长。拖动圆盘是在换黄经，不是在顺着钟面滑：小寒和大寒在一月，跟冬至在盘上挨着，时间上并不相连。左右方向键换候，Home 回到此刻。</p>
+    </div>
+
+    <article class="dossier" id="dossier">
+      <p class="eyebrow" id="kicker"></p>
+      <h2 id="title"></h2>
+      <p class="gloss" id="gloss"></p>
+      <p class="brief" id="brief"></p>
+      <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+      <p class="meter-label" id="meterLabel"></p>
+      <dl class="facts" id="facts"></dl>
+      <p class="pace" id="pace"></p>
+      <div class="sunline">
+        <svg class="orbit" id="orbit" viewBox="0 0 160 160" role="img" aria-labelledby="orbitTitle">
+          <title id="orbitTitle">地球在黄道上的位置，从北面看，逆时针走</title>
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#1b1714" stroke-width="1"></circle>
+          <circle cx="80" cy="80" r="6" fill="#9d2f28"></circle>
+          <line id="ray" x1="80" y1="80" x2="80" y2="22" stroke="#1b1714" stroke-width="1"></line>
+          <circle id="earth" cx="22" cy="80" r="4.5" fill="#1b1714"></circle>
+          <circle id="peri" r="2.4" fill="#9d2f28"></circle>
+          <circle id="aphe" r="2.4" fill="#24344c"></circle>
+          <text x="16" y="84" text-anchor="middle">春</text>
+          <text x="80" y="16" text-anchor="middle">夏</text>
+          <text x="144" y="84" text-anchor="middle">秋</text>
+          <text x="80" y="152" text-anchor="middle">冬</text>
+        </svg>
+        <div>
+          <p id="sunText"></p>
+          <p class="fine" id="eotText"></p>
+          <p class="fine" id="tzText"></p>
+        </div>
+      </div>
+      <p class="warn" id="warn" hidden></p>
+      <div class="note">
+        <label for="note">这一候的笔记</label>
+        <textarea id="note" maxlength="280" placeholder="记下你看见的：霜、鸟、灯，或什么都没有。"></textarea>
+        <p class="fine"><span id="noteCount">0</span>/280　只存在这台浏览器里。</p>
+      </div>
+      <div class="row">
+        <button class="btn" id="prevHou" type="button">上一候</button>
+        <button class="btn" id="nextHou" type="button">下一候</button>
+        <button class="btn primary" id="copy" type="button">复制字条</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+      <pre class="slip" id="slip"></pre>
+    </article>
+  </div>
+
+  <div class="strip-wrap">
+    <h2>二十四节气</h2>
+    <div class="strip" id="strip"></div>
+  </div>
+
+  <section class="insight">
+    <h2 id="insightTitle">候的长短</h2>
+    <p id="insight"></p>
+    <div class="row">
+      <button class="btn" id="goShort" type="button">去看最短的一候</button>
+      <button class="btn" id="goLong" type="button">去看最长的一候</button>
+    </div>
+  </section>
+
+  <section class="almanac">
+    <div class="list-head">
+      <h2>这一年的七十二候</h2>
+      <label class="field">检索
+        <input id="q" type="search" placeholder="候名、节气或一个字">
+      </label>
+    </div>
+    <p class="fine" id="empty" hidden>没有写成这一候的字。</p>
+    <div id="list"></div>
+  </section>
+
+  <details class="method">
+    <summary>这面盘怎么算</summary>
+    <p>节气用定气：太阳视黄经每到 15 的倍数，就是一次交节。立春 315°，春分 0°，夏至 90°，秋分 180°，冬至 270°。一候是接下来的 5°，所以七十二候在盘上一样宽。它们的钟面长短并不一样。一月初地球过近日点，太阳在黄道上走得快，一候不到五日；七月远日点附近走得慢，一候长过五日。</p>
+    <p>黄经来自 VSOP87D 的地球日心黄经（Bretagnon 与 Francou，1988），只保留振幅不小于 10⁻⁷ 弧度的项，换成地心之后加上光行差和章动的主项。交节先在地球时里求解，再扣掉 ΔT 换成协调世界时。ΔT 用 Espenak 与 Meeus 给 2005–2050 年的多项式。和天文年历对照，二十四节气大多同到分钟，个别会差一分钟。更远的年份岁差仍在，钟差是外推的，可能再差几分钟。</p>
+    <p>节气时刻一律写成东八区，不随城市改。城市只决定日出、日没和内环的昼长：太阳中心高度 −0.833°，已经把视半径和平均大气折射算进去。均时差由视黄经对应的赤经和平黄经相减得到。图上的「近」「远」是近日点和远日点，偏心率约 0.017，圆几乎看不出扁，候的长短已经把它露出来了。</p>
+    <p>候名取通行的月令七十二候。释义是现在的话，不是古注。有两处异文写在释义里：小暑三候亦作「鹰乃学习」，大寒初候月令作「鸡乳」。</p>
+  </details>
+
+  <footer>
+    <p class="poem">春雨惊春清谷天，夏满芒夏暑相连。秋处露秋寒霜降，冬雪雪冬小大寒。</p>
+    <p>一百天私物的第二天。小寒、大寒排在冬至之后，日期却在一月，因为盘从立春起算。</p>
+  </footer>
+</div>
+<script src="suihou.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = globalThis.Suihou;
+  if (!S) {
+    document.body.insertAdjacentHTML("beforeend", "<p>历算没有载入。请确认 suihou.js 和本页在同一目录。</p>");
+    return;
+  }
+
+  var SEASON_COLOR = { "春": "#1e5c49", "夏": "#9d2f28", "秋": "#8a6232", "冬": "#24344c" };
+  var state = {
+    ms: Date.now(),
+    follow: true,
+    city: 2,
+    dragLon: null,
+    hover: null,
+    builtYear: null
+  };
+
+  var plateEl = document.getElementById("plate");
+  var canvas = document.getElementById("cv");
+  var ctx = canvas.getContext("2d");
+  var when = document.getElementById("when");
+  var citySel = document.getElementById("city");
+  var note = document.getElementById("note");
+  var listEl = document.getElementById("list");
+  var stripEl = document.getElementById("strip");
+  var q = document.getElementById("q");
+
+  S.CITIES.forEach(function (c, i) {
+    var opt = document.createElement("option");
+    opt.value = String(i);
+    opt.textContent = c.name + (c.tz === 8 ? "" : "（东六区）");
+    citySel.appendChild(opt);
+  });
+  try {
+    var savedCity = localStorage.getItem("suihoupan.city");
+    if (savedCity !== null && S.CITIES[savedCity]) state.city = Number(savedCity);
+  } catch (e) {}
+  citySel.value = String(state.city);
+
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function roundMin(ms) { return Math.round(ms / 60000) * 60000; }
+
+  function fmtDate(ms) {
+    var p = S.civilParts(roundMin(ms), 8);
+    return p.y + "年" + p.m + "月" + p.day + "日";
+  }
+  function fmtMd(ms) {
+    var p = S.civilParts(roundMin(ms), 8);
+    return p.m + "月" + p.day + "日";
+  }
+  function fmtHm(ms) {
+    var p = S.civilParts(roundMin(ms), 8);
+    return pad(p.h) + ":" + pad(p.min);
+  }
+  function fmtMinute(ms) { return fmtMd(ms) + " " + fmtHm(ms); }
+  function fmtWall(ms) {
+    var p = S.civilParts(ms, 8);
+    return p.y + "-" + pad(p.m) + "-" + pad(p.day) + "T" + pad(p.h) + ":" + pad(p.min);
+  }
+  function parseWall(value) {
+    var bits = value.split("T");
+    if (bits.length < 2) return null;
+    var d = bits[0].split("-").map(Number);
+    var t = bits[1].split(":").map(Number);
+    if (d.length < 3 || t.length < 2 || d.some(isNaN) || t.some(isNaN)) return null;
+    return Date.UTC(d[0], d[1] - 1, d[2], t[0], t[1]) - 8 * 3600000;
+  }
+  function fmtSpan(ms) {
+    var mins = Math.round(Math.abs(ms) / 60000);
+    var d = Math.floor(mins / 1440);
+    mins -= d * 1440;
+    var h = Math.floor(mins / 60);
+    mins -= h * 60;
+    return d + "日" + h + "时" + mins + "分";
+  }
+  function fmtRemain(ms) {
+    if (ms < 0) ms = 0;
+    var mins = Math.round(ms / 60000);
+    var d = Math.floor(mins / 1440);
+    mins -= d * 1440;
+    var h = Math.floor(mins / 60);
+    var m = mins - h * 60;
+    if (d) return d + "日" + h + "时" + m + "分";
+    if (h) return h + "时" + m + "分";
+    return m + "分";
+  }
+  function fmtHours(h) {
+    var mins = Math.round(Math.abs(h) * 60);
+    var hh = Math.floor(mins / 60);
+    var mm = mins % 60;
+    return hh + "时" + pad(mm) + "分";
+  }
+  function compared(name, deltaHours) {
+    var mins = Math.round(deltaHours * 60);
+    if (Math.abs(mins) < 2) return "和" + name + "几乎一样长";
+    if (mins >= 0) return "比" + name + "长 " + fmtHours(mins / 60);
+    return "比" + name + "短 " + fmtHours(-mins / 60);
+  }
+  function clockIn(ms, tz) {
+    var p = S.civilParts(roundMin(ms), tz);
+    return pad(p.h) + ":" + pad(p.min);
+  }
+  function dayKey(ms) {
+    var p = S.civilParts(ms, 8);
+    return p.y + "-" + p.m + "-" + p.day;
+  }
+  function noteKey(loc) {
+    return "suihoupan.v1." + loc.year + "." + loc.term.lon + "." + loc.pentad.index;
+  }
+  function city() { return S.CITIES[state.city]; }
+
+  function view() {
+    var loc = S.locate(state.ms);
+    var lon = state.dragLon === null ? S.longitudeAt(state.ms) : state.dragLon;
+    return { loc: loc, lon: lon };
+  }
+
+  function setMs(ms, follow) {
+    state.ms = ms;
+    state.follow = !!follow;
+    state.dragLon = null;
+    var loc = S.locate(ms);
+    if (loc) {
+      history.replaceState(null, "", "#" + loc.year + "-" + loc.term.lon + "-" + loc.pentad.index);
+    }
+    render();
+  }
+
+  function hashBoot() {
+    var m = /^#(\d{4})-(\d{1,3})-([012])$/.exec(location.hash);
+    if (!m) return;
+    var year = Number(m[1]);
+    var lon = Number(m[2]);
+    var idx = Number(m[3]);
+    if (year < 1800 || year > 2200) return;
+    var plate = S.buildPlate(year);
+    var term = plate.terms.filter(function (t) { return t.lon === lon; })[0];
+    if (!term) return;
+    state.ms = S.midpoint(term.pentads[idx]);
+    state.follow = false;
+  }
+
+  function angleOf(lon) {
+    return (S.norm(lon - 315) * Math.PI / 180) - Math.PI / 2;
+  }
+
+  function lonFromPoint(x, y, cx, cy) {
+    var a = Math.atan2(y - cy, x - cx);
+    return S.norm((a + Math.PI / 2) * 180 / Math.PI + 315);
+  }
+
+  function draw() {
+    var v = view();
+    if (!v.loc) return;
+    var rect = plateEl.getBoundingClientRect();
+    var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    var w = Math.max(320, rect.width);
+    var bw = Math.round(w * dpr);
+    if (canvas.width !== bw || canvas.height !== bw) {
+      canvas.width = bw;
+      canvas.height = bw;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var cx = w / 2;
+    var cy = w / 2;
+    var R = w / 2 - 18;
+    ctx.clearRect(0, 0, w, w);
+    ctx.fillStyle = "#f7f1e4";
+    ctx.fillRect(0, 0, w, w);
+
+    var rDayIn = R * 0.40;
+    var rDayOut = R * 0.64;
+    var rHouIn = R * 0.68;
+    var rHouOut = R * 0.76;
+    var rSeaIn = R * 0.78;
+    var rSeaOut = R * 0.86;
+    var rLabel = R * 0.935;
+    var c = city();
+    var year = v.loc.year;
+
+    ctx.beginPath();
+    for (var i = 0; i <= 360; i++) {
+      var lon = S.norm(315 + i);
+      var hours = S.dayHoursAtLongitude(c.lat, lon, year);
+      var r = rDayIn + (hours / 24) * (rDayOut - rDayIn);
+      var a = angleOf(lon);
+      var x = cx + Math.cos(a) * r;
+      var y = cy + Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    for (var j = 360; j >= 0; j--) {
+      var lon2 = S.norm(315 + j);
+      var a2 = angleOf(lon2);
+      ctx.lineTo(cx + Math.cos(a2) * rDayIn, cy + Math.sin(a2) * rDayIn);
+    }
+    ctx.closePath();
+    ctx.fillStyle = "rgba(36, 52, 76, 0.13)";
+    ctx.fill();
+    ctx.beginPath();
+    for (var k = 0; k <= 360; k++) {
+      var lon3 = S.norm(315 + k);
+      var hours3 = S.dayHoursAtLongitude(c.lat, lon3, year);
+      var r3 = rDayIn + (hours3 / 24) * (rDayOut - rDayIn);
+      var a3 = angleOf(lon3);
+      var x3 = cx + Math.cos(a3) * r3;
+      var y3 = cy + Math.sin(a3) * r3;
+      if (k === 0) ctx.moveTo(x3, y3); else ctx.lineTo(x3, y3);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = "rgba(36, 52, 76, 0.45)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    var r12 = rDayIn + 0.5 * (rDayOut - rDayIn);
+    ctx.beginPath();
+    ctx.setLineDash([2, 3]);
+    ctx.arc(cx, cy, r12, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(27,23,20,0.35)";
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#5e564c";
+    ctx.font = "12px " + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("十二时", cx, cy - r12 - 8);
+
+    function slice(r0, r1, lon0, lon1) {
+      var a0 = angleOf(lon0);
+      var span = (lon1 - lon0 + 360) % 360;
+      var a1 = a0 + span * Math.PI / 180;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r1, a0, a1, false);
+      ctx.arc(cx, cy, r0, a1, a0, true);
+      ctx.closePath();
+    }
+
+    v.loc.plate.terms.forEach(function (term) {
+      slice(rSeaIn, rSeaOut, term.lon, S.norm(term.lon + 15));
+      ctx.globalAlpha = term === v.loc.term ? 0.9 : 0.28;
+      ctx.fillStyle = SEASON_COLOR[term.season];
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+
+    v.loc.plate.terms.forEach(function (term) {
+      term.pentads.forEach(function (p) {
+        var on = p === v.loc.pentad;
+        var hot = state.hover && state.hover.pentad === p && !on;
+        slice(rHouIn, rHouOut, p.lon, p.endLon);
+        ctx.fillStyle = on ? "#9d2f28" : hot ? "rgba(157,47,40,0.35)" : "rgba(27,23,20,0.06)";
+        ctx.fill();
+      });
+    });
+
+    ctx.strokeStyle = "#1b1714";
+    ctx.lineWidth = 1;
+    for (var t = 0; t < 72; t++) {
+      var lonT = t * 5;
+      var ang = angleOf(lonT);
+      var inner = t % 3 === 0 ? rHouIn - 8 : rHouOut;
+      var outer = t % 3 === 0 ? rSeaOut + 6 : rHouOut + 5;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang) * inner, cy + Math.sin(ang) * inner);
+      ctx.lineTo(cx + Math.cos(ang) * outer, cy + Math.sin(ang) * outer);
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, rSeaOut, 0, Math.PI * 2);
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, rSeaOut + 5, 0, Math.PI * 2);
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    ctx.fillStyle = "#1b1714";
+    ctx.font = "15px Songti SC, STSong, Noto Serif CJK SC, Source Han Serif SC, WenQuanYi Micro Hei, Droid Sans Fallback, serif";
+    v.loc.plate.terms.forEach(function (term) {
+      var ang = angleOf(S.norm(term.lon + 7.5));
+      ctx.fillText(term.name, cx + Math.cos(ang) * rLabel, cy + Math.sin(ang) * rLabel);
+    });
+
+    var needle = angleOf(v.lon);
+    ctx.strokeStyle = "#9d2f28";
+    ctx.fillStyle = "#9d2f28";
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(needle) * (R * 0.22), cy + Math.sin(needle) * (R * 0.22));
+    ctx.lineTo(cx + Math.cos(needle) * (rSeaOut + 2), cy + Math.sin(needle) * (rSeaOut + 2));
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx + Math.cos(needle) * (rSeaOut + 2), cy + Math.sin(needle) * (rSeaOut + 2), 4.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#f7f1e4";
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 0.30, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#1b1714";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function fact(dt, dd) {
+    var a = document.createElement("dt");
+    a.textContent = dt;
+    var b = document.createElement("dd");
+    b.textContent = dd;
+    return [a, b];
+  }
+
+  function renderList(loc) {
+    if (state.builtYear === loc.year && listEl.childElementCount) return;
+    state.builtYear = loc.year;
+    listEl.textContent = "";
+    loc.plate.byTime.forEach(function (term) {
+      var block = document.createElement("section");
+      block.className = "term-block";
+      block.dataset.term = String(term.lon);
+      var h = document.createElement("h3");
+      h.textContent = term.name;
+      var span = document.createElement("span");
+      span.textContent = fmtMinute(term.start) + " 交节 · " + term.brief;
+      h.appendChild(span);
+      block.appendChild(h);
+      term.pentads.forEach(function (p) {
+        var art = document.createElement("article");
+        art.className = "hou";
+        art.dataset.lon = String(term.lon);
+        art.dataset.index = String(p.index);
+        art.dataset.text = (term.name + p.label + p.name + p.gloss).toLowerCase();
+        var tag = document.createElement("div");
+        tag.className = "tag";
+        tag.textContent = p.label;
+        var nm = document.createElement("div");
+        nm.className = "nm";
+        nm.textContent = p.name;
+        var whenEl = document.createElement("div");
+        whenEl.className = "when";
+        whenEl.textContent = fmtMd(p.start) + " — " + fmtMd(p.end);
+        var gl = document.createElement("div");
+        gl.className = "gl";
+        gl.textContent = p.gloss;
+        art.append(tag, nm, whenEl, gl);
+        art.tabIndex = 0;
+        art.setAttribute("role", "button");
+        function openHou() {
+          setMs(S.midpoint(p), false);
+          if (window.innerWidth < 880) {
+            document.getElementById("dossier").scrollIntoView({ block: "start" });
+          }
+        }
+        art.addEventListener("click", openHou);
+        art.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openHou(); }
+        });
+        block.appendChild(art);
+      });
+      listEl.appendChild(block);
+    });
+    applyFilter();
+  }
+
+  function applyFilter() {
+    var query = q.value.trim().toLowerCase();
+    var shown = 0;
+    listEl.querySelectorAll("article.hou").forEach(function (el) {
+      var ok = !query || el.dataset.text.indexOf(query) !== -1;
+      el.hidden = !ok;
+      if (ok) shown++;
+    });
+    listEl.querySelectorAll(".term-block").forEach(function (block) {
+      var any = block.querySelector("article.hou:not([hidden])");
+      block.hidden = !any;
+    });
+    document.getElementById("empty").hidden = shown !== 0;
+  }
+
+  function renderStrip(loc) {
+    var today = dayKey(Date.now());
+    if (stripEl.dataset.year !== String(loc.year)) {
+      stripEl.dataset.year = String(loc.year);
+      stripEl.textContent = "";
+      loc.plate.byTime.forEach(function (term) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.dataset.lon = String(term.lon);
+        var b = document.createElement("b");
+        b.textContent = term.name;
+        var s = document.createElement("span");
+        s.textContent = fmtMd(term.start);
+        btn.append(b, s);
+        btn.title = term.name + " " + fmtDate(term.start) + " " + fmtHm(term.start);
+        btn.addEventListener("click", function () {
+          var shown = roundMin(term.start);
+          setMs(shown >= term.start && shown < term.end ? shown : term.start + 1000, false);
+        });
+        stripEl.appendChild(btn);
+      });
+    }
+    var currentLon = String(loc.term.lon);
+    stripEl.querySelectorAll("button").forEach(function (btn) {
+      var term = loc.plate.byTime.filter(function (t) { return String(t.lon) === btn.dataset.lon; })[0];
+      btn.classList.toggle("on", btn.dataset.lon === currentLon);
+      btn.classList.toggle("today", term && dayKey(term.start) === today);
+    });
+  }
+
+  function placeOrbit(lon, year) {
+    var theta = (lon + 180) * Math.PI / 180;
+    var ex = 80 + 58 * Math.cos(theta);
+    var ey = 80 + 58 * Math.sin(theta);
+    var earth = document.getElementById("earth");
+    earth.setAttribute("cx", ex.toFixed(2));
+    earth.setAttribute("cy", ey.toFixed(2));
+    document.getElementById("ray").setAttribute("x2", ex.toFixed(2));
+    document.getElementById("ray").setAttribute("y2", ey.toFixed(2));
+    function mark(id, sunLon) {
+      var th = (sunLon + 180) * Math.PI / 180;
+      var x = 80 + 58 * Math.cos(th);
+      var y = 80 + 58 * Math.sin(th);
+      document.getElementById(id).setAttribute("cx", x.toFixed(2));
+      document.getElementById(id).setAttribute("cy", y.toFixed(2));
+    }
+    var peri = S.perihelionSunLongitude(year);
+    mark("peri", peri);
+    mark("aphe", S.norm(peri + 180));
+  }
+
+  function slipText(loc) {
+    var p = loc.pentad;
+    var endLon = p.endLon === 0 ? 360 : p.endLon;
+    return [
+      "岁候盘 · " + loc.year,
+      loc.term.name + p.label + " · " + p.name,
+      fmtMinute(p.start) + " 至 " + fmtMinute(p.end) + "（东八区）",
+      "黄经 " + p.lon + "°–" + endLon + "°",
+      p.gloss
+    ].join("\n");
+  }
+
+  function render() {
+    var v = view();
+    var loc = v.loc;
+    document.getElementById("now").setAttribute("aria-pressed", state.follow ? "true" : "false");
+    var clock = S.civilParts(Date.now(), 8);
+    document.getElementById("liveClock").textContent = pad(clock.h) + ":" + pad(clock.min) + ":" + pad(clock.s);
+    document.getElementById("liveDate").textContent = "东八区 " + clock.y + "年" + clock.m + "月" + clock.day + "日" + (state.follow ? " · 正在走时" : "");
+    if (!loc) {
+      document.getElementById("title").textContent = "这一刻算不出候";
+      return;
+    }
+    if (document.activeElement !== when) when.value = fmtWall(state.ms);
+    document.getElementById("yearLabel").textContent = String(loc.year);
+
+    var p = loc.pentad;
+    var term = loc.term;
+    document.getElementById("kicker").textContent = term.season + " · " + term.name + " · " + p.label;
+    document.getElementById("title").textContent = p.name;
+    document.getElementById("gloss").textContent = p.gloss;
+    document.getElementById("brief").textContent = term.brief;
+    var frac = state.dragLon === null ? loc.fraction : (function () {
+      var at = (v.lon - p.lon + 360) % 360;
+      var span = (p.endLon - p.lon + 360) % 360 || 5;
+      return Math.max(0, Math.min(1, at / span));
+    })();
+    document.getElementById("meter").style.width = (frac * 100).toFixed(1) + "%";
+    document.getElementById("meterLabel").textContent = "这一候已走过 " + Math.round(frac * 100) + "%，还剩 " + fmtRemain(p.end - state.ms);
+    document.getElementById("dossier").style.borderTopColor = SEASON_COLOR[term.season];
+    document.title = p.name + " · 岁候盘";
+    plateEl.setAttribute("aria-label", loc.year + "年" + term.name + p.label + p.name + "，黄经 " + v.lon.toFixed(1) + "度");
+
+    var facts = document.getElementById("facts");
+    facts.textContent = "";
+    var rows = [
+      ["黄经", v.lon.toFixed(2) + "°"],
+      ["本候", fmtMinute(p.start) + " — " + fmtMinute(p.end)],
+      ["时长", fmtSpan(p.end - p.start)],
+      ["交节", term.name + " " + fmtMinute(term.start)],
+      ["下一候", (function () {
+        var at = loc.index + 1;
+        if (at < loc.plate.flat.length) {
+          var n = loc.plate.flat[at];
+          return n.term.name + " · " + n.pentad.name;
+        }
+        return "转入下一年";
+      })()]
+    ];
+    rows.forEach(function (pair) {
+      fact(pair[0], pair[1]).forEach(function (node) { facts.appendChild(node); });
+    });
+    document.getElementById("pace").textContent = S.paceNote(p.end - p.start);
+
+    var c = city();
+    var sun = S.sunOn(state.ms, c);
+    var summer = S.dayHoursAtLongitude(c.lat, 90, loc.year);
+    var winter = S.dayHoursAtLongitude(c.lat, 270, loc.year);
+    var sunText;
+    if (sun.polar === "day") sunText = c.name + "这一天太阳不落。";
+    else if (sun.polar === "night") sunText = c.name + "这一天太阳不出。";
+    else {
+      sunText = c.name + "昼长 " + fmtHours(sun.dayHours) + "，日出 " + clockIn(sun.rise, c.tz) + "，正午 " + clockIn(sun.noon, c.tz) + "，日没 " + clockIn(sun.set, c.tz) + "。" + compared("夏至", sun.dayHours - summer) + "，" + compared("冬至", sun.dayHours - winter) + "。";
+    }
+    document.getElementById("sunText").textContent = sunText;
+    var eot = Math.round(sun.eotMin);
+    var eotText = "均时差接近零，日晷和平太阳时几乎重合。";
+    if (eot >= 1) eotText = "均时差：日晷比平太阳时快约 " + eot + " 分。";
+    if (eot <= -1) eotText = "均时差：日晷比平太阳时慢约 " + (-eot) + " 分。";
+    document.getElementById("eotText").textContent = eotText;
+    document.getElementById("tzText").textContent = (c.tz === 8
+      ? "节气与日出都按东八区的钟面。"
+      : c.name + "的民用时是东六区。节气仍写东八区，日出日没按当地的钟。") + "轨道上红点是近日，蓝点是远日。";
+    placeOrbit(v.lon, loc.year);
+
+    var warn = document.getElementById("warn");
+    if (loc.plate.reliable) warn.hidden = true;
+    else {
+      warn.hidden = false;
+      warn.textContent = "这一年的钟差是外推的，交节时刻可能再差几分钟。";
+    }
+
+    var key = noteKey(loc);
+    if (note.dataset.key !== key && document.activeElement !== note) {
+      note.dataset.key = key;
+      try { note.value = localStorage.getItem(key) || ""; } catch (e) { note.value = ""; }
+    }
+    document.getElementById("noteCount").textContent = String(note.value.length);
+
+    var slip = slipText(loc);
+    document.getElementById("slip").textContent = slip;
+
+    document.getElementById("hubKicker").textContent = term.name + " · " + p.label;
+    var hubName = document.getElementById("hubName");
+    hubName.textContent = p.name;
+    hubName.dataset.len = String(p.name.length);
+    document.getElementById("hubSub").textContent = "黄经 " + v.lon.toFixed(1) + "°";
+
+    var banner = document.getElementById("banner");
+    var todayTerm = loc.plate.byTime.filter(function (t) { return dayKey(t.start) === dayKey(state.ms); })[0];
+    if (todayTerm) {
+      var delta = todayTerm.start - state.ms;
+      if (Math.abs(delta) <= 10 * 60000) banner.textContent = "此刻正在交节。" + todayTerm.name + "，" + fmtHm(todayTerm.start) + "。黄经 " + todayTerm.lon + "°。";
+      else if (delta > 0) banner.textContent = "今日交节。" + todayTerm.name + "，" + fmtHm(todayTerm.start) + "。还剩 " + fmtRemain(delta) + "。";
+      else banner.textContent = "今日已交" + todayTerm.name + "，时刻是 " + fmtHm(todayTerm.start) + "。现在这一候是" + p.name + "。";
+      banner.hidden = false;
+    } else {
+      var upcoming = loc.plate.byTime.filter(function (t) { return t.start > state.ms; })[0];
+      if (upcoming && upcoming.start - state.ms < 36 * 3600000) {
+        banner.hidden = false;
+        banner.textContent = "距" + upcoming.name + "还有 " + fmtRemain(upcoming.start - state.ms) + "，" + fmtMinute(upcoming.start) + "。";
+      } else banner.hidden = true;
+    }
+
+    var short = loc.plate.shortest;
+    var long = loc.plate.longest;
+    document.getElementById("insightTitle").textContent = loc.year + " 年，候的长短";
+    document.getElementById("insight").textContent =
+      "平均一候 " + fmtSpan(S.MEAN_PENTAD_MS) + "。这一年最短的是" + short.term.name + "·" + short.pentad.name + "，" + fmtSpan(short.pentad.end - short.pentad.start) + "；最长的是" + long.term.name + "·" + long.pentad.name + "，" + fmtSpan(long.pentad.end - long.pentad.start) + "。近日点在一月初，冬候被压短，夏候被拉长。";
+
+    renderStrip(loc);
+    renderList(loc);
+    listEl.querySelectorAll("article.hou").forEach(function (el) {
+      var on = el.dataset.lon === String(term.lon) && el.dataset.index === String(p.index);
+      el.classList.toggle("current", on);
+    });
+    var onBtn = stripEl.querySelector("button.on");
+    if (onBtn && stripEl.dataset.scrolled !== onBtn.dataset.lon) {
+      stripEl.dataset.scrolled = onBtn.dataset.lon;
+      var left = onBtn.offsetLeft - stripEl.clientWidth / 2 + onBtn.clientWidth / 2;
+      stripEl.scrollLeft = Math.max(0, left);
+    }
+    draw();
+  }
+
+  function pointerLon(ev) {
+    var rect = plateEl.getBoundingClientRect();
+    var x = ev.clientX - rect.left;
+    var y = ev.clientY - rect.top;
+    var cx = rect.width / 2;
+    var cy = rect.height / 2;
+    var dx = x - cx;
+    var dy = y - cy;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < rect.width * 0.16 || dist > rect.width * 0.52) return null;
+    return lonFromPoint(x, y, cx, cy);
+  }
+
+  plateEl.addEventListener("pointerdown", function (ev) {
+    var lon = pointerLon(ev);
+    if (lon === null) return;
+    plateEl.setPointerCapture(ev.pointerId);
+    state.dragging = true;
+    state.follow = false;
+    state.dragLon = lon;
+    var loc = S.locate(state.ms);
+    if (!loc) return;
+    var hit = pentadByLon(loc.plate, lon);
+    if (!hit) return;
+    var approx = hit.pentad.start + hit.frac * (hit.pentad.end - hit.pentad.start);
+    state.ms = S.instantOfLongitude(lon, approx, loc.year);
+    render();
+  });
+  plateEl.addEventListener("pointermove", function (ev) {
+    var lon = pointerLon(ev);
+    var loc = S.locate(state.ms);
+    if (!loc) return;
+    if (state.dragging && lon !== null) {
+      state.dragLon = lon;
+      var hit = pentadByLon(loc.plate, lon);
+      if (hit) {
+        var approx = hit.pentad.start + hit.frac * (hit.pentad.end - hit.pentad.start);
+        state.ms = S.instantOfLongitude(lon, approx, loc.year);
+      }
+      render();
+      return;
+    }
+    if (lon === null) {
+      if (state.hover) { state.hover = null; draw(); }
+      return;
+    }
+    var hover = pentadByLon(loc.plate, lon);
+    if (!state.hover || !hover || state.hover.pentad !== hover.pentad) {
+      state.hover = hover;
+      draw();
+    }
+  });
+  function endDrag() {
+    if (!state.dragging) return;
+    state.dragging = false;
+    var lon = state.dragLon;
+    state.dragLon = null;
+    if (lon !== null) {
+      var loc = S.locate(state.ms);
+      if (loc) {
+        var hit = pentadByLon(loc.plate, lon);
+        if (hit) {
+          var approx = hit.pentad.start + hit.frac * (hit.pentad.end - hit.pentad.start);
+          state.ms = S.instantOfLongitude(lon, approx, loc.year);
+        }
+      }
+      var placed = S.locate(state.ms);
+      if (placed) history.replaceState(null, "", "#" + placed.year + "-" + placed.term.lon + "-" + placed.pentad.index);
+    }
+    render();
+  }
+  plateEl.addEventListener("pointerup", endDrag);
+  plateEl.addEventListener("pointercancel", endDrag);
+  plateEl.addEventListener("pointerleave", function () {
+    if (state.dragging) return;
+    state.hover = null;
+    draw();
+  });
+
+  function pentadByLon(plate, lon) {
+    for (var i = 0; i < plate.terms.length; i++) {
+      var term = plate.terms[i];
+      for (var k = 0; k < term.pentads.length; k++) {
+        var p = term.pentads[k];
+        var span = (p.endLon - p.lon + 360) % 360;
+        if (!span) span = 5;
+        var at = (lon - p.lon + 360) % 360;
+        if (at < span - 1e-6) return { term: term, pentad: p, frac: at / span };
+      }
+    }
+    return null;
+  }
+
+  document.getElementById("now").addEventListener("click", function () { setMs(Date.now(), true); });
+  document.getElementById("prevYear").addEventListener("click", function () { setMs(S.shiftInstant(state.ms, -1), false); });
+  document.getElementById("nextYear").addEventListener("click", function () { setMs(S.shiftInstant(state.ms, 1), false); });
+  document.getElementById("prevHou").addEventListener("click", function () { setMs(S.stepPentad(state.ms, -1), false); });
+  document.getElementById("nextHou").addEventListener("click", function () { setMs(S.stepPentad(state.ms, 1), false); });
+  when.addEventListener("input", function () {
+    var ms = parseWall(when.value);
+    if (ms === null || isNaN(ms)) return;
+    setMs(ms, false);
+  });
+  citySel.addEventListener("change", function () {
+    state.city = Number(citySel.value);
+    try { localStorage.setItem("suihoupan.city", String(state.city)); } catch (e) {}
+    render();
+  });
+  q.addEventListener("input", applyFilter);
+  note.addEventListener("input", function () {
+    var loc = S.locate(state.ms);
+    document.getElementById("noteCount").textContent = String(note.value.length);
+    if (!loc) return;
+    try {
+      var key = noteKey(loc);
+      if (note.value) localStorage.setItem(key, note.value);
+      else localStorage.removeItem(key);
+    } catch (e) {}
+  });
+  document.getElementById("goShort").addEventListener("click", function () {
+    var loc = S.locate(state.ms);
+    if (loc) setMs(S.midpoint(loc.plate.shortest.pentad), false);
+  });
+  document.getElementById("goLong").addEventListener("click", function () {
+    var loc = S.locate(state.ms);
+    if (loc) setMs(S.midpoint(loc.plate.longest.pentad), false);
+  });
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = document.getElementById("slip").textContent;
+    var done = function (ok) {
+      document.getElementById("status").textContent = ok ? "已抄下。" : "浏览器没有给剪贴板，字条在下面，可以自己选中。";
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    } else done(false);
+  });
+
+  document.addEventListener("keydown", function (ev) {
+    var tag = (ev.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select") return;
+    if (ev.key === "ArrowRight") { ev.preventDefault(); setMs(S.stepPentad(state.ms, 1), false); }
+    else if (ev.key === "ArrowLeft") { ev.preventDefault(); setMs(S.stepPentad(state.ms, -1), false); }
+    else if (ev.key === "Home") { ev.preventDefault(); setMs(Date.now(), true); }
+    else if (ev.key === "PageUp") { ev.preventDefault(); setMs(S.shiftInstant(state.ms, 1), false); }
+    else if (ev.key === "PageDown") { ev.preventDefault(); setMs(S.shiftInstant(state.ms, -1), false); }
+  });
+
+  window.addEventListener("resize", draw);
+  hashBoot();
+  render();
+  setInterval(function () {
+    if (state.follow) state.ms = Date.now();
+    if (state.dragging) return;
+    render();
+  }, 1000);
+})();
+</script>
+</body>
+</html>
