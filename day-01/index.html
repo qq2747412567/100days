@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>纸上夜空</title>
+<link rel="stylesheet" href="sky.css">
+</head>
+<body>
+<div class="sheet">
+  <header class="mast">
+    <div class="mast-copy">
+      <p class="eyebrow">一百天私物 · 第 1 天</p>
+      <h1>纸上夜空</h1>
+      <p class="lede" id="lede">正在对表。</p>
+    </div>
+    <div class="seal" aria-hidden="true"><span>第</span><span>一</span><span>夜</span><span>空</span></div>
+  </header>
+
+  <div class="stage">
+    <div class="chart" id="chart">
+      <canvas id="sky"></canvas>
+      <p class="status" id="status"></p>
+    </div>
+
+    <aside class="side" id="side">
+      <section>
+        <h2>月亮</h2>
+        <div class="moon-row">
+          <canvas id="moonDisc" width="148" height="148" aria-label="月相"></canvas>
+          <div>
+            <p class="big" id="moonName">朔</p>
+            <p id="moonText"></p>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>行星</h2>
+        <ul class="plist" id="planetList"></ul>
+      </section>
+      <section>
+        <h2>历与节气</h2>
+        <p id="calText"></p>
+      </section>
+      <section>
+        <h2>正在看</h2>
+        <div id="card"><p class="muted">点星星、月亮或行星。地平图里可以拖动转身。</p></div>
+      </section>
+      <section>
+        <h2>流星</h2>
+        <p id="showerText"></p>
+      </section>
+      <section>
+        <h2>寻星</h2>
+        <input id="search" type="search" placeholder="织女、参宿、Vega…" autocomplete="off">
+        <ul class="plist" id="results"></ul>
+      </section>
+    </aside>
+
+    <form class="controls" id="controls">
+      <label>城市
+        <select id="city"></select>
+      </label>
+      <label>北纬
+        <input id="lat" type="number" step="0.01" min="-55" max="75">
+      </label>
+      <label>东经
+        <input id="lon" type="number" step="0.01" min="-180" max="180">
+      </label>
+      <label>日期
+        <input id="date" type="date" min="1901-01-01" max="2099-12-31">
+      </label>
+      <label>北京时间
+        <input id="time" type="time" step="60">
+      </label>
+      <div class="btns">
+        <button type="button" id="nowBtn">此刻</button>
+        <button type="button" id="nightBtn">看到入夜</button>
+        <button type="button" id="playBtn">播放这一夜</button>
+        <button type="button" id="locBtn">用我的位置</button>
+      </div>
+      <div class="btns mode">
+        <button type="button" id="modeAll" aria-pressed="true">全天</button>
+        <button type="button" id="modeHor" aria-pressed="false">地平</button>
+        <button type="button" id="resetView">北向上</button>
+      </div>
+      <label class="grow">星等上限 <span id="magVal">4.4</span>
+        <input id="mag" type="range" min="1.5" max="5.2" step="0.1" value="4.4">
+      </label>
+      <label>播放速度
+        <select id="speed">
+          <option value="15">15 分钟/秒</option>
+          <option value="40" selected>40 分钟/秒</option>
+          <option value="90">90 分钟/秒</option>
+          <option value="180">3 小时/秒</option>
+        </select>
+      </label>
+      <fieldset>
+        <legend>图层</legend>
+        <label><input type="checkbox" data-layer="names" checked>星名</label>
+        <label><input type="checkbox" data-layer="lines" checked>连线</label>
+        <label><input type="checkbox" data-layer="conNames" checked>星座名</label>
+        <label><input type="checkbox" data-layer="mansions" checked>二十八宿</label>
+        <label><input type="checkbox" data-layer="guide" checked>认星</label>
+        <label><input type="checkbox" data-layer="ecliptic" checked>黄道赤道</label>
+        <label><input type="checkbox" data-layer="milky" checked>银河</label>
+        <label><input type="checkbox" data-layer="nebulae" checked>星云</label>
+        <label><input type="checkbox" data-layer="grid" checked>网格</label>
+        <label><input type="checkbox" data-layer="far" checked>天王海王</label>
+      </fieldset>
+    </form>
+  </div>
+
+  <footer class="colophon">
+    <p>拖动星图转身。滚轮在全天图里改星等，在地平图里改广角。时间一律是北京时间，星星则按当地经纬度升起。</p>
+    <details>
+      <summary>这张图怎么算的</summary>
+      <p>恒星位置来自依巴谷星表的公开整理，中文星名用传统星官名，再按岁差改正到当晚。行星用 NASA JPL 在 1800–2050 年拟合的开普勒根数。月亮用平均轨道加上主要摄动，地平附近扣了视差。节气是当日黄经每 15° 一截。农历按北京时间的朔和中气推算：同日里中气归初一，不归前一月。二十八宿的距星采用通行对照，参宿标在参宿三，女宿标在宝瓶座 ε。牛宿不是牛郎，女宿不是织女。</p>
+      <p>精度大约 1°，够认星，不够导航，也不当正式历书。地平附近加了平均大气折射。</p>
+    </details>
+  </footer>
+</div>
+<script src="catalog.js"></script>
+<script src="astro.js"></script>
+<script src="sky.js"></script>
+</body>
+</html>
