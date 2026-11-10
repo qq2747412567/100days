@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>潮汐抄写室</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%23102028' width='16' height='16'/%3E%3Cpath d='M1 11c2-3 4-3 6 0s4 3 8 0' fill='none' stroke='%23d5e6e2' stroke-width='1.2'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --sea: #102028;
+    --paper: #f4ead7;
+    --paper-2: #f7efdf;
+    --ink: #241c14;
+    --ink-soft: #5e5348;
+    --seal: #8f2d2a;
+    --moss: #1d5c50;
+    --line: #c9b48a;
+    --gold: #e2b15a;
+    --foam: #d5e6e2;
+    --serif: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", "Source Han Serif SC", "PMingLiU", "WenQuanYi Micro Hei", "Droid Sans Fallback", serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.65;
+    background:
+      radial-gradient(1100px 520px at 12% -10%, #1a3e49 0%, transparent 60%),
+      radial-gradient(900px 480px at 110% 110%, #071014 0%, transparent 55%),
+      var(--sea);
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button {
+    background: transparent;
+    border: 1px solid var(--ink);
+    padding: 7px 12px;
+    min-height: 36px;
+    cursor: pointer;
+  }
+  button:hover { background: var(--ink); color: var(--paper); }
+  button:disabled { opacity: 0.45; cursor: default; }
+  button:disabled:hover { background: transparent; color: inherit; }
+  button.primary { background: var(--seal); color: var(--paper); border-color: var(--seal); }
+  button.primary:hover { background: #6e201e; color: var(--paper); }
+  button.big { padding: 12px 20px; font-size: 18px; }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  a { color: var(--seal); }
+  h1, h2, h3 { font-weight: 500; }
+  h2 { font-size: 20px; letter-spacing: 0.14em; margin: 0 0 8px; }
+  h3 { font-size: 16px; margin: 14px 0 6px; }
+  p { margin: 0 0 8px; }
+  .muted { color: var(--ink-soft); font-size: 14px; }
+  .eyebrow { letter-spacing: 0.22em; font-size: 13px; color: var(--seal); margin: 0; }
+  .card, .ending, .col, .modal, .manual {
+    background-color: var(--paper);
+    background-image: linear-gradient(180deg, rgba(255,255,255,.38), rgba(255,255,255,0) 90px);
+    box-shadow: 0 16px 50px rgba(0,0,0,.32);
+  }
+  .title-screen {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    gap: 22px;
+    padding: 28px;
+    min-height: 100vh;
+    align-items: center;
+  }
+  .chart-frame { background: #f3e7d2; box-shadow: 0 16px 50px rgba(0,0,0,.32); }
+  .title-screen #section { width: 100%; height: min(72vh, 680px); display: block; }
+  .card { padding: 32px 30px 26px; }
+  .card h1 { font-size: 42px; letter-spacing: 0.16em; margin: 8px 0 14px; font-weight: 500; }
+  .shell {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr) 330px;
+    gap: 14px;
+    padding: 16px 16px 32px;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  .top, .log { grid-column: 1 / -1; }
+  .top {
+    color: var(--paper);
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr) 210px auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .brand-name { font-size: 22px; letter-spacing: 0.18em; }
+  .brand-sub, .now-line { color: var(--foam); font-size: 13px; }
+  .now-time { font-size: 28px; letter-spacing: 0.06em; line-height: 1.1; }
+  #spark { width: 100%; height: 72px; display: block; }
+  .top-actions { display: flex; flex-direction: column; gap: 6px; }
+  .top-actions button { color: var(--paper); border-color: var(--foam); }
+  .top-actions button:hover { background: var(--paper); color: var(--ink); }
+  .log { color: var(--foam); font-size: 14px; min-height: 1.4em; }
+  .log span { display: block; opacity: 0.72; }
+  .log span:last-child { opacity: 1; color: var(--paper); }
+  .col { padding: 14px; }
+  .letter { position: sticky; top: 12px; align-self: start; max-height: calc(100vh - 24px); overflow: auto; }
+  .nav ul { list-style: none; padding: 0; margin: 0 0 10px; }
+  .nav li { margin: 0 0 6px; }
+  .nav button { width: 100%; text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .nav small { color: var(--ink-soft); font-size: 12px; }
+  .nav button.current { background: var(--ink); color: var(--paper); }
+  .nav button.current small { color: #e7d7b8; }
+  .nav button.current:hover { background: var(--ink); color: var(--paper); }
+  .nav-cost { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
+  .jump { display: none; }
+  .stage #section { width: 100%; height: 400px; display: block; }
+  .places { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .place { border: 1px solid var(--line); background: var(--paper-2); padding: 8px 10px; }
+  .place h3 { margin: 0 0 2px; letter-spacing: 0.08em; }
+  .place p { margin: 0 0 6px; color: var(--ink-soft); font-size: 13px; }
+  .place button { width: 100%; text-align: left; }
+  .slip {
+    position: relative;
+    background: linear-gradient(180deg, #f7efdf, #f1e2c8);
+    border: 1px solid var(--line);
+    padding: 10px 12px 12px;
+    margin: 0 0 12px;
+  }
+  .slip header, .lh { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-soft); }
+  .slip .where { font-size: 13px; color: var(--ink-soft); }
+  .slip .body { font-size: 16px; }
+  .slip.taken, .slip.locked { opacity: 0.78; }
+  .sealchar {
+    display: inline-grid; place-items: center;
+    width: 28px; height: 28px; flex: 0 0 auto;
+    border: 1.5px solid var(--seal); color: var(--seal); border-radius: 50%;
+  }
+  .waits, .rowbtns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .tray { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 13px; padding: 4px 8px; }
+  ol.letter-list { list-style: none; padding: 0; margin: 0 0 8px; }
+  ol.letter-list li { border-top: 1px solid var(--line); padding: 8px 0; }
+  ol.letter-list .empty { color: var(--ink-soft); }
+  ol.letter-list p { margin: 4px 0; }
+  .notes { background: #f6e4d8; padding: 8px 10px 4px; margin: 8px 0; }
+  .notes.good { background: #e3f0ea; }
+  .notes ul { margin: 0 0 8px; padding-left: 1.2em; }
+  .count { margin-top: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid rgba(36,28,20,.12); vertical-align: top; }
+  .table-wrap { overflow: auto; max-width: 100%; }
+  tr.nowrow { background: rgba(29, 92, 80, .14); }
+  .diff-bad { color: var(--seal); font-weight: 600; }
+  .diff-ok { color: var(--moss); font-weight: 600; }
+  td.seal { color: var(--seal); }
+  .pencil { color: #3e5160; background: transparent; border-left: 2px solid #8aa0ad; padding-left: 8px; font-size: 14px; }
+  .modal-back, .manual-back {
+    position: fixed; inset: 0; z-index: 20;
+    background: rgba(8, 14, 18, .62);
+    display: grid; place-items: center;
+    padding: 16px;
+  }
+  .modal { width: min(460px, 100%); padding: 22px; }
+  .manual { width: min(680px, 100%); max-height: min(82vh, 760px); overflow: auto; padding: 26px 26px 20px; }
+  .manual h2 { margin-top: 0; }
+  .ending-wrap { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; }
+  .ending { width: min(760px, 100%); padding: 42px 40px 32px; }
+  .ending h1 { font-size: 36px; letter-spacing: 0.18em; margin: 6px 0 16px; font-weight: 500; }
+  .ending-layout { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; }
+  .ending .line { font-size: 18px; margin: 0 0 12px; }
+  .acro {
+    color: var(--seal);
+    letter-spacing: 0.2em;
+    line-height: 1.85;
+    border-left: 1px solid var(--seal);
+    padding-left: 12px;
+    margin: 0;
+  }
+  .coda { margin-top: 16px; }
+  @media (max-width: 980px) {
+    .title-screen { grid-template-columns: 1fr; padding: 12px; align-items: start; }
+    .title-screen .card { order: 1; }
+    .title-screen .chart-frame { order: 2; }
+    .title-screen #section { height: 300px; }
+    .shell { grid-template-columns: 1fr; }
+    .top { grid-template-columns: 1fr 1fr; }
+    #spark { grid-column: 1 / -1; }
+    .letter { position: static; max-height: none; }
+    .jump { display: block; }
+    .places { grid-template-columns: 1fr; }
+    .ending { padding: 28px 20px 22px; }
+    .card { padding: 22px 18px 18px; }
+    .card h1, .ending h1 { letter-spacing: 0.08em; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript>需要启用 JavaScript。用浏览器打开这个文件，才能值这一夜的班。</noscript>
+<script>
+const DAY = 12 * 60;
+const TRAVEL = 15;
+const COPY = 10;
+const TOL = 4;
+const KEY = "tide-copy-room-v1";
+const FONT = '"WenQuanYi Micro Hei","Microsoft YaHei","PingFang SC",sans-serif';
+const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const TRUE_IDS = ["p1","p2","p3","p4","p5","p6","p7","p8"];
+const ROOM_NAME = { desk:"抄写台", lamp:"灯室", west:"西廊", south:"南廊", north:"北井", east:"东廊" };
+const SORT_NAME = { found:"抄录顺序", time:"按时辰", diff:"按潮差" };
+const WATCH = {
+  酉: "窗还是干的，铁链露在水面以上。",
+  戌: "浮桥开始发滑。北井若要去，就在这一两个时辰里。",
+  亥: "水还在退。错过的龛，不会自己再来一次。",
+  子: "抄写室里只剩你的灯，和很远的水声。",
+  丑: "潮退到脚背附近时，底层抽屉会脱离淤泥。",
+  寅: "水开始往回走。放过的走廊正在重新开合。",
+  卯: "天还没白，窗台先有了一条暗边。"
+};
+const HINTS = [
+  "西廊梁上的深抽屉，潮位要高于九十格才够得着。入夜就有。若错过，黎明前还有很短的一次，从灯室过去要提前一刻钟动身。",
+  "北井一夜只齐平一次：落潮，而且潮位大约在五十到八十二格。涨起来之后不会再开。",
+  "有一页花押写着「缄」，潮位也对，可没有任何一页的花押指向它的首字。它不是信的最后一页。"
+];
+const SLIPS = [
+  { id:"p1", first:"我", seal:"在", hour:"18:30", realTide:true, room:"west", min:90, where:"梁上深抽屉，铜环还热着", text:"我把前六封都封进码头第三级台阶下的铁盒，盒盖朝西。" },
+  { id:"p2", first:"在", seal:"灯", hour:"20:30", realTide:true, room:"south", where:"南廊第二格，压在一张海图下面", text:"在铁链没顶之前离开栈桥，水比人走得快。" },
+  { id:"p3", first:"灯", seal:"下", hour:"21:00", realTide:true, room:"north", where:"井壁的龛里，外面包着油纸", text:"灯先留给抄写台，剩下的油只够两个时辰。" },
+  { id:"p4", first:"下", seal:"等", hour:"22:00", realTide:true, room:"east", where:"东廊矮柜的上层", text:"下一次潮退到今夜这个刻度，柜子的夹层才会自己打开。" },
+  { id:"p5", first:"等", seal:"你", hour:"23:30", realTide:true, room:"east", max:10, where:"底层抽屉，边沿还有泥", text:"等你翻到那张船票，别找返程，它本来就没有。" },
+  { id:"p6", first:"你", seal:"回", hour:"02:00", realTide:true, room:"east", where:"东廊矮柜的中层，和干笔搁在一起", text:"你若只剩下一只手，就去按灯室东墙第三块松动的砖。" },
+  { id:"p7", first:"回", seal:"头", hour:"04:00", realTide:true, room:"south", where:"南廊靠窗的一格", text:"回家的城名要反着读，顺着读会走进潮里。" },
+  { id:"p8", first:"头", seal:"缄", hour:"05:00", realTide:true, room:"west", where:"浮桥栏杆的夹缝里，塞得很紧", text:"头一回觉得这座城是安静的，是我把这一行写完的时候。" },
+  { id:"f1", first:"海", seal:"市", hour:"19:00", level:41, room:"west", where:"西廊地上的淤泥里，只剩半张", text:"海图上的城名被盐咬掉了一半，剩下的笔画像一只码头。" },
+  { id:"f2", first:"市", seal:"会", hour:"21:00", level:92, room:"south", where:"南廊地砖缝里，只露出一角", text:"市声会在第二声钟后灭干净，那之后不要再数人。" },
+  { id:"f3", first:"会", seal:"记", hour:"23:00", level:66, room:"east", where:"东廊门槛的缝里", text:"会有人站在台阶上替你数，可那个人不识字。" },
+  { id:"f4", first:"潮", seal:"你", hour:"00:30", level:55, room:"east", where:"贴在东廊墙上，边裁得很齐", text:"潮把纸边裁得很齐，齐得不像是水干的。" },
+  { id:"f5", first:"声", seal:"回", hour:"03:00", level:88, room:"east", where:"矮柜夹层外头，像是被人敲过", text:"声音停在夹层里，敲两下，它才肯应你。" },
+  { id:"f6", first:"不", seal:"头", hour:"04:30", level:18, room:"south", where:"南廊绳子上，用木夹夹着", text:"不要相信只有去程的票，那是留给走不回来的人的。" },
+  { id:"f7", first:"风", seal:"铃", hour:"19:30", realTide:true, room:"west", where:"一盏横放的灯下面", text:"风从井里倒灌进来的那一夜，灯是横着亮的。" },
+  { id:"f8", first:"信", seal:"缄", hour:"02:30", realTide:true, room:"north", where:"井底一块干石头上，放得很正", text:"信写到这里就可以停，后面剩下的全是水声。" }
+];
+
+function rawTide(hour) {
+  const pi2 = Math.PI * 2;
+  const m2 = 32 * Math.sin(pi2 * (hour - 2.1) / 12.4206);
+  const s2 = 14 * Math.sin(pi2 * (hour - 5.4) / 12);
+  const k1 = 10 * Math.sin(pi2 * (hour - 8) / 23.934);
+  const o1 = 7 * Math.sin(pi2 * (hour - 3.2) / 25.819);
+  return m2 + s2 + k1 + o1;
+}
+let TIDE_MIN = Infinity;
+let TIDE_MAX = -Infinity;
+for (let m = 0; m <= DAY; m++) {
+  const raw = rawTide(18 + m / 60);
+  if (raw < TIDE_MIN) TIDE_MIN = raw;
+  if (raw > TIDE_MAX) TIDE_MAX = raw;
+}
+
+function tideInfo(minutes) {
+  const hour = 18 + minutes / 60;
+  const raw = rawTide(hour);
+  const level = (raw - TIDE_MIN) / (TIDE_MAX - TIDE_MIN) * 100;
+  const nextRaw = rawTide(hour + 1 / 60);
+  const next = (nextRaw - TIDE_MIN) / (TIDE_MAX - TIDE_MIN) * 100;
+  return { level, falling: next < level - 0.0001 };
+}
+function fallingSlow(minutes) {
+  const ahead = Math.min(DAY, minutes + 20);
+  return tideInfo(ahead).level < tideInfo(minutes).level - 0.05;
+}
+function clockOf(minutes) {
+  const total = ((18 * 60 + Math.round(minutes)) % (24 * 60) + 24 * 60) % (24 * 60);
+  return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
+}
+function shichenName(minutes) {
+  const names = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  const clockMin = (18 * 60 + Math.round(minutes)) % (24 * 60);
+  return names[Math.floor(((clockMin + 60) % (24 * 60)) / 120)];
+}
+function minutesOfClock(hhmm) {
+  const parts = hhmm.split(":").map(Number);
+  let mins = parts[0] * 60 + parts[1] - 18 * 60;
+  if (mins < 0) mins += 24 * 60;
+  return mins;
+}
+function levelAtHour(hhmm) { return tideInfo(minutesOfClock(hhmm)).level; }
+function slip(id) { return SLIPS.find((s) => s.id === id); }
+function shownLevel(s) { return s.realTide ? Math.round(levelAtHour(s.hour)) : s.level; }
+function roomName(id) { return ROOM_NAME[id] || id; }
+function alwaysOpen(id) { return id === "desk" || id === "lamp"; }
+function roomIsOpen(id, minutes) {
+  if (alwaysOpen(id)) return true;
+  const info = tideInfo(minutes);
+  if (id === "west") return info.level >= 62;
+  if (id === "south") return info.level >= 40 && info.level <= 72;
+  if (id === "east") return info.level <= 36;
+  if (id === "north") return info.falling && info.level >= 50 && info.level <= 82;
+  return false;
+}
+function predDeep(t) { return tideInfo(t).level >= 90; }
+function predLow(t) { return tideInfo(t).level <= 10; }
+function placeSpec(key) {
+  const table = {
+    west: { key:"west", room:"west", name:"西廊", band:"潮位不低于 62 格", pred: (t) => roomIsOpen("west", t) },
+    deep: { key:"deep", room:"west", name:"西廊深抽屉", band:"潮位不低于 90 格", pred: predDeep },
+    south: { key:"south", room:"south", name:"南廊", band:"潮位在 40 到 72 格", pred: (t) => roomIsOpen("south", t) },
+    north: { key:"north", room:"north", name:"北井", band:"落潮，且潮位在 50 到 82 格", pred: (t) => roomIsOpen("north", t) },
+    east: { key:"east", room:"east", name:"东廊", band:"潮位不高于 36 格", pred: (t) => roomIsOpen("east", t) },
+    low: { key:"low", room:"east", name:"东廊底层抽屉", band:"潮位不高于 10 格", pred: predLow }
+  };
+  return table[key];
+}
+function nextTrue(pred, from) {
+  for (let t = Math.max(0, from); t < DAY; t++) if (pred(t)) return t;
+  return null;
+}
+function followingStart(pred, now) {
+  const start = pred(now) ? now : nextTrue(pred, now + 1);
+  if (start == null) return null;
+  let t = start;
+  while (t < DAY && pred(t)) t++;
+  return nextTrue(pred, t);
+}
+function arrivalPlan(roomId, pred) {
+  const now = state.minutes;
+  if (state.room === roomId && pred(now)) return { kind: "here" };
+  if (state.room === roomId) {
+    const openAt = nextTrue(pred, now + 1);
+    if (openAt == null) return { kind: "never" };
+    return { kind: "wait-here", arrive: openAt };
+  }
+  if (now + TRAVEL < DAY && pred(now + TRAVEL)) return { kind: "go", arrive: now + TRAVEL };
+  const openAt = nextTrue(pred, now + TRAVEL);
+  if (openAt == null) return { kind: "never" };
+  const depart = openAt - TRAVEL;
+  if (depart < now) return { kind: "never" };
+  return { kind: "ride", depart, arrive: openAt };
+}
+function slipAvailable(s, minutes) {
+  if (!roomIsOpen(s.room, minutes)) return false;
+  const lv = tideInfo(minutes).level;
+  if (s.min != null && lv < s.min) return false;
+  if (s.max != null && lv > s.max) return false;
+  return true;
+}
+function cn(i) { return "一二三四五六七八九"[i] || String(i + 1); }
+function judge(ids) {
+  const notes = [];
+  ids.forEach((id, i) => {
+    const s = slip(id);
+    const actual = Math.round(levelAtHour(s.hour));
+    const claimed = shownLevel(s);
+    if (Math.abs(actual - claimed) > TOL) {
+      notes.push({ text: "第" + cn(i) + "行潮痕不合。" + s.hour + " 表上是 " + actual + " 格，页上写着 " + claimed + " 格。" });
+    }
+    if (i < ids.length - 1) {
+      const next = slip(ids[i + 1]);
+      if (s.seal !== next.first) {
+        notes.push({ text: "第" + cn(i) + "行花押是「" + s.seal + "」，下一行却以「" + next.first + "」起头。" });
+      }
+    }
+  });
+  if (ids.length > 8) notes.push({ text: "超过八行了。" });
+  if (ids.length > 0 && ids.length < 8) notes.push({ text: "还差 " + (8 - ids.length) + " 行。真信一共八行。" });
+  if (ids.length === 8 && slip(ids[7]).seal !== "缄") notes.push({ text: "末行的花押不是「缄」，信还敞着。" });
+  return { ok: ids.length === 8 && notes.length === 0, notes };
+}
+function secretLine() { return TRUE_IDS.map((id) => slip(id).first).join(""); }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+}
+function navNote(id) {
+  if (alwaysOpen(id)) return "一直开着";
+  const arrive = state.minutes + TRAVEL;
+  const arrOpen = arrive < DAY && roomIsOpen(id, arrive);
+  const nxt = nextTrue((t) => roomIsOpen(id, t), state.minutes + 1);
+  if (arrOpen) return roomIsOpen(id, state.minutes) ? "开着" : "走到时会开";
+  if (nxt == null) return "今夜不再开";
+  return "关着 · 约 " + clockOf(nxt) + " 开";
+}
+
+function blank() {
+  return {
+    started: false, minutes: 0, room: "desk", copied: [], letter: [], hints: 0,
+    seenLamp: false, log: [], ended: null, audio: localStorage.getItem("tide-copy-audio") === "1",
+    ledgerSort: "found", modal: null, manual: false
+  };
+}
+let state = blank();
+function pushLog(line) {
+  state.log.push(line);
+  if (state.log.length > 5) state.log.shift();
+}
+function save() {
+  const data = {
+    started: state.started, minutes: state.minutes, room: state.room, copied: state.copied,
+    letter: state.letter, hints: state.hints, seenLamp: state.seenLamp, log: state.log.slice(-5),
+    ended: state.ended, audio: state.audio, ledgerSort: state.ledgerSort
+  };
+  if (!state.started) {
+    localStorage.removeItem(KEY);
+  } else {
+    localStorage.setItem(KEY, JSON.stringify(data));
+  }
+  localStorage.setItem("tide-copy-audio", state.audio ? "1" : "0");
+}
+function loadSave() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.started) return null;
+    return data;
+  } catch (e) { return null; }
+}
+
+let audio = null;
+function ensureAudio() {
+  if (audio) return audio;
+  try {
+    const ctx = new AudioContext();
+    const master = ctx.createGain();
+    master.gain.value = 0;
+    master.connect(ctx.destination);
+    const o1 = ctx.createOscillator();
+    o1.type = "sine";
+    o1.frequency.value = 73.42;
+    const o2 = ctx.createOscillator();
+    o2.type = "triangle";
+    o2.frequency.value = 110;
+    const g1 = ctx.createGain();
+    g1.gain.value = 0.18;
+    const g2 = ctx.createGain();
+    g2.gain.value = 0.05;
+    o1.connect(g1); o2.connect(g2); g1.connect(master); g2.connect(master);
+    o1.start(); o2.start();
+    const len = Math.floor(ctx.sampleRate * 2);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    let n = 0;
+    for (let i = 0; i < len; i++) {
+      n = (n + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+      data[i] = n * 3.2;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 420;
+    const ng = ctx.createGain();
+    ng.gain.value = 0.22;
+    src.connect(filter); filter.connect(ng); ng.connect(master);
+    src.start();
+    audio = { ctx, master, o2, filter };
+    return audio;
+  } catch (e) {
+    audio = null;
+    return null;
+  }
+}
+function syncAudio() {
+  if (!audio) return;
+  const on = state.audio && state.started && !state.ended;
+  const lv = tideInfo(Math.min(state.minutes, DAY)).level;
+  const t = audio.ctx.currentTime;
+  audio.master.gain.cancelScheduledValues(t);
+  audio.master.gain.linearRampToValueAtTime(on ? 0.16 : 0, t + 0.25);
+  audio.o2.frequency.linearRampToValueAtTime(98 + lv * 0.35, t + 0.6);
+  audio.filter.frequency.linearRampToValueAtTime(260 + lv * 5, t + 0.6);
+}
+function tone(freq, delay, dur, peak) {
+  if (!state.audio || !audio) return;
+  const ctx = audio.ctx;
+  const start = ctx.currentTime + delay;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = "sine";
+  o.frequency.value = freq;
+  o.connect(g); g.connect(audio.master);
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(peak, start + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  o.start(start); o.stop(start + dur + 0.02);
+}
+function chime() { tone(392, 0, 1.05, 0.35); tone(523.25, 0.18, 1.05, 0.28); }
+function wood() { tone(196, 0, 0.18, 0.3); }
+
+function finish(kind) {
+  if (kind === "dawn" && judge(state.letter).ok) kind = "dawn-ok";
+  else if (kind === "dawn") kind = "fail";
+  state.ended = kind;
+  state.modal = null;
+  state.manual = false;
+  save();
+  render({ top: true });
+}
+function advance(n) {
+  if (n <= 0) return true;
+  const before = shichenName(state.minutes);
+  if (state.minutes + n >= DAY) {
+    state.minutes = DAY;
+    state.modal = null;
+    finish("dawn");
+    return false;
+  }
+  state.minutes += n;
+  if (shichenName(state.minutes) !== before) {
+    chime();
+    pushLog(shichenName(state.minutes) + "时到了。");
+  }
+  syncAudio();
+  save();
+  return true;
+}
+function tryTravel(roomId) {
+  if (!ROOM_NAME[roomId] || roomId === state.room) return;
+  if (!alwaysOpen(roomId)) {
+    if (!(state.minutes + TRAVEL < DAY && roomIsOpen(roomId, state.minutes + TRAVEL))) {
+      pushLog(roomName(roomId) + "这一路走过去是关的。" + navNote(roomId) + "。");
+      render();
+      return;
+    }
+  }
+  if (state.minutes + TRAVEL >= DAY) { advance(TRAVEL); return; }
+  if (!advance(TRAVEL)) return;
+  state.room = roomId;
+  if (roomId === "lamp") state.seenLamp = true;
+  const info = tideInfo(state.minutes);
+  pushLog("你到了" + roomName(roomId) + "。" + clockOf(state.minutes) + "，潮位 " + Math.round(info.level) + " 格。");
+  save();
+  render({ top: true });
+}
+function copySlip(id) {
+  const s = slip(id);
+  if (!s || state.copied.includes(id)) return;
+  if (state.room !== s.room || !slipAvailable(s, state.minutes)) {
+    pushLog("这一页现在够不着。");
+    render();
+    return;
+  }
+  if (!advance(COPY)) return;
+  state.copied.push(id);
+  pushLog("你抄下以「" + s.first + "」起头的一页，收进页匣。");
+  wood();
+  save();
+  render();
+}
+function waitTo(target) {
+  state.modal = null;
+  const delta = target - state.minutes;
+  if (delta <= 0) { render(); return; }
+  if (!advance(delta)) return;
+  const info = tideInfo(state.minutes);
+  const shut = !alwaysOpen(state.room) && !roomIsOpen(state.room, state.minutes);
+  pushLog(shut
+    ? "你坐到 " + clockOf(state.minutes) + "。" + roomName(state.room) + "已经关上，你还在里面。"
+    : "你坐到 " + clockOf(state.minutes) + "。潮位 " + Math.round(info.level) + " 格，" + (info.falling ? "落着" : "涨着") + "。");
+  save();
+  render();
+}
+function requestWait(mins) {
+  const target = Math.min(DAY, state.minutes + mins);
+  if (target <= state.minutes) { finish("dawn"); return; }
+  if (mins >= 60) {
+    state.modal = {
+      kind: "wait", target,
+      text: "从 " + clockOf(state.minutes) + " 坐到 " + clockOf(target) + "。一个时辰里，开过的门不会留下来等你。",
+      yes: "就这样坐", no: "先不坐"
+    };
+    render();
+    return;
+  }
+  waitTo(target);
+}
+function modalText(plan, name) {
+  if (plan.kind === "ride") {
+    return "坐到 " + clockOf(plan.depart) + "，再走一刻钟，" + clockOf(plan.arrive) + " 到达" + name + "。中间这段时间你不会去别的走廊。";
+  }
+  return "坐到 " + clockOf(plan.arrive) + "。你会留在这里，别处的门该开还是会开，只是你不在。";
+}
+function runPlan(spec, plan) {
+  state.modal = null;
+  if (plan.kind === "go") { tryTravel(spec.room); return; }
+  if (plan.kind === "wait-here") { waitTo(plan.arrive); return; }
+  if (plan.kind === "ride") {
+    if (plan.depart > state.minutes && !advance(plan.depart - state.minutes)) return;
+    tryTravel(spec.room);
+  }
+}
+function requestPlan(key, force) {
+  const spec = placeSpec(key);
+  if (!spec) return;
+  const plan = arrivalPlan(spec.room, spec.pred);
+  if (plan.kind === "here" || plan.kind === "never") return;
+  const delta = plan.kind === "ride" ? plan.depart - state.minutes : plan.kind === "wait-here" ? plan.arrive - state.minutes : 0;
+  if (!force && delta >= 45) {
+    state.manual = false;
+    state.modal = { kind:"plan", key, text: modalText(plan, spec.name), yes:"按这个时辰走", no:"再看看表" };
+    render();
+    return;
+  }
+  runPlan(spec, plan);
+}
+function planLabel(plan) {
+  if (plan.kind === "go") return "现在去（一刻钟，" + clockOf(plan.arrive) + " 到）";
+  if (plan.kind === "ride") return "坐到 " + clockOf(plan.depart) + " 出发，" + clockOf(plan.arrive) + " 到";
+  if (plan.kind === "wait-here") return "坐到 " + clockOf(plan.arrive) + "，它会开";
+  return "";
+}
+function addToLetter(id) {
+  if (!state.copied.includes(id) || state.letter.includes(id)) return;
+  if (state.letter.length >= 8) {
+    pushLog("信笺只有八行。先抽出一行，再列入这一页。");
+    render();
+    return;
+  }
+  state.letter.push(id);
+  save();
+  render();
+}
+function moveLetter(i, dir) {
+  const j = i + dir;
+  if (i < 0 || j < 0 || i >= state.letter.length || j >= state.letter.length) return;
+  const tmp = state.letter[i];
+  state.letter[i] = state.letter[j];
+  state.letter[j] = tmp;
+  save();
+  render();
+}
+function pullLetter(i) {
+  if (i < 0 || i >= state.letter.length) return;
+  state.letter.splice(i, 1);
+  save();
+  render();
+}
+function trySeal() {
+  if (judge(state.letter).ok) finish("seal");
+  else {
+    pushLog("还不能封。页边上的批注还在。");
+    render();
+  }
+}
+function takeHint() {
+  if (state.room !== "lamp" || state.hints >= HINTS.length) return;
+  if (!advance(15)) return;
+  state.hints += 1;
+  pushLog("你辨认出一行铅笔字。");
+  save();
+  render();
+}
+function cycleSort() {
+  const order = ["found", "time", "diff"];
+  state.ledgerSort = order[(order.indexOf(state.ledgerSort) + 1) % order.length];
+  save();
+  render();
+}
+function toggleAudio() {
+  state.audio = !state.audio;
+  if (state.audio) {
+    const a = ensureAudio();
+    if (a && a.ctx.state === "suspended") a.ctx.resume();
+  }
+  syncAudio();
+  save();
+  render();
+}
+function startNew() {
+  const keep = state.audio;
+  state = blank();
+  state.audio = keep;
+  state.started = true;
+  state.log = ["门下有钥匙。字条还是湿的，字还认得出。"];
+  save();
+  render({ top: true });
+}
+function abandon() {
+  const keep = state.audio;
+  localStorage.removeItem(KEY);
+  state = blank();
+  state.audio = keep;
+  syncAudio();
+  render();
+}
+function requestAbandon() {
+  state.manual = false;
+  state.modal = { kind:"abandon", text:"这一夜抄到的页会从这台浏览器里抹掉。潮会从酉时重新涨起。", yes:"抹掉，重来", no:"留下" };
+  render();
+}
+
+function roomProse() {
+  const id = state.room;
+  const lv = tideInfo(state.minutes).level;
+  const open = alwaysOpen(id) || roomIsOpen(id, state.minutes);
+  if (id === "desk") return "榆木桌被海水沤成深褐色。左手抽屉里扣着《抄写室三律》，笔洗是干的。你从门后摸到一支笔，笔尖还有上次留下的盐。";
+  if (id === "lamp") return "灯室不存纸，只存时间。整面墙钉着今夜的潮汐表。铅笔在落潮的半腰画了个圈，圈边只写着一个字：「井」。";
+  if (id === "west") {
+    if (!open) return "水退了，浮桥悬在半空，从下面够不着梁。你可以在廊里等涨回来，也可以先去别处。";
+    if (lv >= 90) return "浮桥被水托着，几乎贴住梁。深抽屉的铜环正对手心，木头泡胀了，还是拉得开。";
+    return "西廊还进得去。浮桥矮了一截，梁上那只深抽屉的铜环已经够不着。";
+  }
+  if (id === "south") {
+    if (!open) return "南廊的门只在一段水位里开。太高时门被反压住，太低时台阶悬空。你如果已经站在里面，就只能等，或者离开。";
+    return "南廊的架子齐腰。纸页还没有被水浸透，这是这里最好的一刻。";
+  }
+  if (id === "east") {
+    if (!open) return "水已经漫过矮柜。东廊只在浅水时让人膝行进去。";
+    if (lv <= 10) return "底层抽屉终于脱离淤泥。拉开的时候，里面有一口气。";
+    return "你几乎是膝行进来的。矮柜贴着地面，柜门上有一道泥线。底层还埋着。";
+  }
+  if (!open) return "龛与踏脚错开了。北井只在落潮过半、水位还在胸口上下时与走廊齐平。涨潮之后井口会高过路面。";
+  return "井壁上的龛正好与踏脚齐平。井里没有水，风从下面来，纸是干的。";
+}
+function slipCards() {
+  const list = SLIPS.filter((s) => s.room === state.room);
+  if (!list.length) return "";
+  if (!roomIsOpen(state.room, state.minutes)) {
+    return "<p class=\"muted\">架子离开了手够得到的地方。已经抄走的还在页匣里。</p>";
+  }
+  return list.map((s) => {
+    if (state.copied.includes(s.id)) {
+      return "<article class=\"slip taken\"><p class=\"where\">" + esc(s.where) + "</p><p class=\"muted\">这页你已经抄走了。</p></article>";
+    }
+    if (!slipAvailable(s, state.minutes)) {
+      const now = Math.round(tideInfo(state.minutes).level);
+      const why = s.min != null
+        ? "还够不着。潮位要到 " + s.min + " 格以上，现在是 " + now + " 格。可以在这里等，也可以回灯室对表。"
+        : "还埋着。要退到 " + s.max + " 格以下，现在是 " + now + " 格。可以在这里等，也可以回灯室对表。";
+      return "<article class=\"slip locked\"><p class=\"where\">" + esc(s.where) + "</p><p>" + esc(why) + "</p></article>";
+    }
+    const claimed = shownLevel(s);
+    const actual = Math.round(levelAtHour(s.hour));
+    const diff = Math.abs(actual - claimed);
+    const cmp = state.seenLamp ? "<p class=\"" + (diff > TOL ? "diff-bad" : "diff-ok") + "\">表上这一时辰是 " + actual + " 格，差 " + diff + "。</p>" : "";
+    return "<article class=\"slip\"><header><span>" + esc(s.hour) + " · 潮位 " + claimed + " 格</span><span class=\"sealchar\" title=\"花押\">" + esc(s.seal) + "</span></header><p class=\"where\">" + esc(s.where) + "</p><p class=\"body\">" + esc(s.text) + "</p>" + cmp + "<button data-act=\"copy\" data-id=\"" + s.id + "\">抄下（" + COPY + " 分钟）</button></article>";
+  }).join("");
+}
+function waitButtons() {
+  return "<div class=\"waits\"><button data-act=\"wait\" data-min=\"15\">等一刻钟</button><button data-act=\"wait\" data-min=\"30\">等半小时</button><button data-act=\"wait\" data-min=\"60\">等一个时辰</button></div>";
+}
+function ledgerHTML() {
+  if (!state.copied.length) return "<p class=\"muted\">页匣还是空的。走廊里的页，抄下来才会出现在这里。</p>";
+  const rows = state.copied.map((id) => slip(id));
+  if (state.ledgerSort === "time") rows.sort((a, b) => minutesOfClock(a.hour) - minutesOfClock(b.hour));
+  if (state.ledgerSort === "diff") {
+    rows.sort((a, b) => {
+      const da = Math.abs(Math.round(levelAtHour(a.hour)) - shownLevel(a));
+      const db = Math.abs(Math.round(levelAtHour(b.hour)) - shownLevel(b));
+      return db - da;
+    });
+  }
+  const head = state.seenLamp
+    ? "你把灯室的表默到了页边。差是页上潮位和表上潮位相差的格数，大于四就不是今夜的真页。"
+    : "这些是页上自己写的数字。灯室的表还没读过，差值先空着。";
+  const body = rows.map((s) => {
+    const actual = Math.round(levelAtHour(s.hour));
+    const claimed = shownLevel(s);
+    const diff = Math.abs(actual - claimed);
+    const diffCell = state.seenLamp ? "<td class=\"" + (diff > TOL ? "diff-bad" : "diff-ok") + "\">" + diff + "</td>" : "<td>—</td>";
+    const actualCell = state.seenLamp ? "<td>" + actual + "</td>" : "<td>—</td>";
+    return "<tr><td>" + esc(s.first) + "</td><td>" + esc(s.text) + "</td><td class=\"seal\">" + esc(s.seal) + "</td><td>" + esc(s.hour) + "</td><td>" + claimed + "</td>" + actualCell + diffCell + "</tr>";
+  }).join("");
+  return "<p>" + head + "</p><button data-act=\"sort\">排列：" + SORT_NAME[state.ledgerSort] + "</button><div class=\"table-wrap\"><table class=\"ledger\"><thead><tr><th>首字</th><th>正文</th><th>花押</th><th>时辰</th><th>页上</th><th>表上</th><th>差</th></tr></thead><tbody>" + body + "</tbody></table></div>";
+}
+function placeCards() {
+  const keys = ["west", "deep", "south", "north", "east", "low"];
+  return "<div class=\"places\">" + keys.map((key) => {
+    const spec = placeSpec(key);
+    const plan = arrivalPlan(spec.room, spec.pred);
+    let action = "";
+    if (plan.kind === "never") action = "<p>今夜已经去不成了。</p>";
+    else if (plan.kind === "here") action = "<p>你就在这儿。</p>";
+    else action = "<button data-act=\"plan\" data-plan=\"" + key + "\">" + esc(planLabel(plan)) + "</button>";
+    const later = followingStart(spec.pred, state.minutes);
+    const note = later == null ? "关掉之后，今夜不再开。" : "关掉之后，还会在 " + clockOf(later) + " 再开。";
+    return "<section class=\"place\"><h3>" + esc(spec.name) + "</h3><p>" + esc(spec.band) + "</p><p>" + esc(note) + "</p>" + action + "</section>";
+  }).join("") + "</div>";
+}
+function tideTable() {
+  let rows = "";
+  let prev = null;
+  const mark = Math.min(DAY, Math.floor(state.minutes / 30) * 30);
+  for (let m = 0; m <= DAY; m += 30) {
+    const info = tideInfo(m);
+    const trend = prev == null ? "—" : info.level < prev - 0.05 ? "落" : "涨";
+    prev = info.level;
+    const opens = ["west", "south", "north", "east"].filter((id) => roomIsOpen(id, m)).map(roomName);
+    let extra = "";
+    if (info.level >= 90) extra += " · 深抽屉";
+    if (info.level <= 10) extra += " · 底层";
+    rows += "<tr class=\"" + (m === mark ? "nowrow" : "") + "\"><td>" + shichenName(m) + "时</td><td>" + clockOf(m) + "</td><td>" + Math.round(info.level) + "</td><td>" + trend + "</td><td>" + (opens.length ? esc(opens.join("、")) : "—") + extra + "</td></tr>";
+  }
+  return "<div class=\"table-wrap\"><table class=\"tide\"><thead><tr><th>时辰</th><th>钟点</th><th>潮位</th><th>势</th><th>开着</th></tr></thead><tbody>" + rows + "</tbody></table></div><p class=\"muted\">一百格是今夜最高，零格是今夜最低。真页所记的潮位，与同一时辰这一列相差不超过四格。</p>";
+}
+function hintBlock() {
+  const got = HINTS.slice(0, state.hints).map((h) => "<p class=\"pencil\">" + esc(h) + "</p>").join("");
+  const btn = state.hints >= HINTS.length
+    ? "<p class=\"muted\">铅笔注只有这三行。</p>"
+    : "<button data-act=\"hint\">辨认一行铅笔注（15 分钟） " + state.hints + " / 3</button>";
+  return got + btn;
+}
+function deskHTML() {
+  const opens = ["west", "south", "north", "east"].filter((id) => roomIsOpen(id, state.minutes)).map(roomName);
+  const openLine = opens.length ? "此刻进得去的走廊：" + opens.join("、") + "。" : "此刻四条走廊都关着。灯室还开着。";
+  return "<h2>抄写台</h2><p>" + roomProse() + "</p><p>" + esc(openLine) + "</p><button data-act=\"manual\">翻开《抄写室三律》</button><h3>页边对照</h3>" + ledgerHTML();
+}
+function lampHTML() {
+  return "<h2>灯室</h2><p>" + roomProse() + "</p><div class=\"chart-frame\"><canvas id=\"section\" aria-label=\"潮汐剖面，水位线切过的房间开着\"></canvas></div><h3>按表动身</h3>" + placeCards() + "<h3>铅笔注</h3>" + hintBlock() + "<h3>今夜的表</h3>" + tideTable();
+}
+function stageHTML() {
+  if (state.room === "desk") return deskHTML() + "<h3>坐一会儿</h3>" + waitButtons();
+  if (state.room === "lamp") return lampHTML() + "<h3>不看表，只坐着</h3>" + waitButtons();
+  return "<p class=\"jump\"><a href=\"#letter\">先看信笺</a></p><h2>" + roomName(state.room) + "</h2><p>" + roomProse() + "</p>" + slipCards() + "<h3>坐一会儿</h3>" + waitButtons();
+}
+function trayHTML() {
+  if (!state.copied.length) return "<p class=\"muted\">页匣是空的。</p>";
+  return "<div class=\"tray\">" + state.copied.map((id) => {
+    const s = slip(id);
+    const inn = state.letter.includes(id);
+    return "<button class=\"chip\" data-act=\"add\" data-id=\"" + id + "\"" + (inn ? " disabled" : "") + ">" + esc(s.first) + " · " + esc(s.hour) + (inn ? " · 已列入" : " · 列入") + "</button>";
+  }).join("") + "</div>";
+}
+function letterColumn() {
+  const j = judge(state.letter);
+  const items = [];
+  for (let i = 0; i < 8; i++) {
+    const id = state.letter[i];
+    if (!id) {
+      items.push("<li class=\"empty\"><span>第" + cn(i) + "行</span>　空着</li>");
+      continue;
+    }
+    const s = slip(id);
+    items.push("<li><div class=\"lh\"><span>第" + cn(i) + "行 · " + esc(s.hour) + " · " + shownLevel(s) + " 格</span><span class=\"sealchar\">" + esc(s.seal) + "</span></div><p>" + esc(s.text) + "</p><div class=\"rowbtns\"><button data-act=\"up\" data-i=\"" + i + "\"" + (i === 0 ? " disabled" : "") + ">上移</button><button data-act=\"down\" data-i=\"" + i + "\"" + (i === state.letter.length - 1 ? " disabled" : "") + ">下移</button><button data-act=\"pull\" data-i=\"" + i + "\">抽出</button></div></li>");
+  }
+  const notes = state.letter.length
+    ? "<div class=\"notes" + (j.ok ? " good" : "") + "\">" + (j.ok ? "<p>三律都过了。可以封缄。</p>" : "<ul>" + j.notes.map((n) => "<li>" + esc(n.text) + "</li>").join("") + "</ul>") + "</div>"
+    : "<p class=\"muted\">从页匣把页列进来。顺序可以用上移、下移改。</p>";
+  return "<h2>页匣</h2>" + trayHTML() + "<h2>信笺</h2><ol class=\"letter-list\">" + items.join("") + "</ol>" + notes + "<button class=\"primary\" data-act=\"seal\">誊清并封缄</button><p class=\"muted count\">已抄 " + state.copied.length + " / 16 · 已列入 " + state.letter.length + " / 8</p>";
+}
+function navHTML() {
+  const items = [["desk","抄写台"],["lamp","灯室"],["west","西廊"],["south","南廊"],["north","北井"],["east","东廊"]];
+  return "<p class=\"nav-cost\">走路一刻钟 · 抄一页十分钟</p><ul>" + items.map(([id, name]) => {
+    const cur = state.room === id;
+    return "<li><button data-act=\"travel\" data-room=\"" + id + "\" class=\"" + (cur ? "current" : "") + "\"><b>" + name + "</b><small>" + (cur ? "你在这里" : esc(navNote(id))) + "</small></button></li>";
+  }).join("") + "</ul><button data-act=\"manual\">翻开三律</button>";
+}
+function brandSub() {
+  const j = judge(state.letter);
+  if (j.ok) return "三律已过，可以封缄";
+  if (state.letter.length) return "信笺 " + state.letter.length + " 行，尚未闭合";
+  if (!state.copied.length) return "第七封还散在走廊里";
+  return "页匣里有 " + state.copied.length + " 页";
+}
+function headerHTML() {
+  const info = tideInfo(state.minutes);
+  const shi = shichenName(state.minutes);
+  return "<header class=\"top\"><div><div class=\"brand-name\">潮汐抄写室</div><div class=\"brand-sub\">" + esc(brandSub()) + "</div></div><canvas id=\"spark\" aria-hidden=\"true\"></canvas><div class=\"now\"><div class=\"now-time\">" + clockOf(state.minutes) + "</div><div>" + shi + "时 · " + Math.round(info.level) + " 格 · " + (fallingSlow(state.minutes) ? "落" : "涨") + "</div><div class=\"now-line\">" + esc(WATCH[shi] || "") + "</div></div><div class=\"top-actions\"><button data-act=\"audio\" aria-pressed=\"" + (state.audio ? "true" : "false") + "\">潮声 " + (state.audio ? "开" : "关") + "</button><button data-act=\"manual\">三律</button><button data-act=\"abandon\">这夜作废</button></div></header>";
+}
+function manualOverlay() {
+  return "<div class=\"manual-back\" data-act=\"close-manual\"><article class=\"manual\" data-act=\"stop\"><p class=\"eyebrow\">抽屉里的薄册</p><h2>抄写室三律</h2><p>前一任用铅笔写在封底：别相信页数，相信规矩。散页一共十六张，今夜的真页只有八张。</p><h3>一、潮痕</h3><p>每页角上有时辰和潮位。把时辰对准灯室的表，表上的水位和页上所记相差在四格以内，才可能是今夜的真页。差出一掌以上的，是别的夜里抄错、又被潮水冲回来的废页。</p><h3>二、花押</h3><p>右下角那个字，是下一行正文的第一个字。最后一行的花押必须是「缄」。顺序靠它，不靠哪一句更像结尾。</p><h3>三、藏头</h3><p>八行正文的第一个字连读，应当是一句人话。它不是用来找页的线索。抄对之后，你自然会看见。</p><h3>附注</h3><p>走去另一间要一刻钟。抄下一页要十分钟。走廊看到达那一刻的潮位，不看出发的时候。灯室的表可以替你算动身的时辰。北井一夜只与走廊齐平一次。</p><div class=\"rowbtns\"><button class=\"primary\" data-act=\"close-manual\">把册子扣上</button></div></article></div>";
+}
+function modalOverlay() {
+  const m = state.modal;
+  return "<div class=\"modal-back\" data-act=\"modal-no\"><div class=\"modal\" data-act=\"stop\"><p>" + esc(m.text) + "</p><div class=\"rowbtns\"><button class=\"primary\" data-act=\"modal-yes\">" + esc(m.yes) + "</button><button data-act=\"modal-no\">" + esc(m.no) + "</button></div></div></div>";
+}
+function overlay() {
+  if (state.manual) return manualOverlay();
+  if (state.modal) return modalOverlay();
+  return "";
+}
+
+let sectionHits = [];
+let sectionLive = false;
+let rafId = 0;
+function fitCanvas(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(1, rect.width);
+  const h = Math.max(1, rect.height);
+  const pw = Math.max(1, Math.round(w * dpr));
+  const ph = Math.max(1, Math.round(h * dpr));
+  if (canvas.width !== pw || canvas.height !== ph) {
+    canvas.width = pw;
+    canvas.height = ph;
+  }
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+function drawSection(canvas, minutes, time, interactive) {
+  const fitted = fitCanvas(canvas);
+  const ctx = fitted.ctx;
+  const w = fitted.w;
+  const h = fitted.h;
+  sectionHits = [];
+  sectionLive = interactive;
+  if (w < 40 || h < 40) return;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#f3e7d2";
+  ctx.fillRect(0, 0, w, h);
+  const padL = 42;
+  const padR = 12;
+  const loftH = 28;
+  const top = 12 + loftH + 10;
+  const bottom = h - 26;
+  const yOf = (lv) => bottom - (Math.max(0, Math.min(100, lv)) / 100) * (bottom - top);
+  ctx.font = "11px " + FONT;
+  ctx.textBaseline = "middle";
+  for (let lv = 0; lv <= 100; lv += 10) {
+    const yy = yOf(lv);
+    ctx.strokeStyle = "rgba(36,28,20,.1)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, yy);
+    ctx.lineTo(w - padR, yy);
+    ctx.stroke();
+    ctx.fillStyle = "#8a7b68";
+    ctx.textAlign = "right";
+    ctx.fillText(String(lv), padL - 6, yy);
+  }
+  const mins = Math.max(0, Math.min(DAY, minutes));
+  const info = tideInfo(mins);
+  const waterY = yOf(info.level);
+  ctx.beginPath();
+  ctx.moveTo(padL, bottom);
+  for (let x = padL; x <= w - padR; x += 3) {
+    ctx.lineTo(x, waterY + Math.sin(x * 0.045 + time * 0.002) * 1.5);
+  }
+  ctx.lineTo(w - padR, bottom);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(47,111,122,.22)";
+  ctx.fill();
+
+  const gap = 6;
+  const inner = w - padL - padR;
+  const colW = (inner - gap * 3) / 4;
+  const cols = [
+    { id:"west", name:"西廊", a:62, b:100 },
+    { id:"north", name:"北井", a:50, b:82 },
+    { id:"south", name:"南廊", a:40, b:72 },
+    { id:"east", name:"东廊", a:0, b:36 }
+  ];
+  function box(x, yy, bw, bh, name, hit) {
+    const here = state.started && hit && hit.room && state.room === hit.room && !hit.plan;
+    const open = !!(hit && hit.room !== "desk" && hit.room !== "lamp" && roomOpenAt(hit, mins));
+    ctx.save();
+    ctx.fillStyle = open ? "rgba(143,45,42,.22)" : "rgba(244,234,215,.86)";
+    ctx.strokeStyle = here || open ? "#8f2d2a" : "#241c14";
+    ctx.lineWidth = here ? 2.4 : open ? 1.7 : 1.1;
+    ctx.fillRect(x, yy, bw, bh);
+    ctx.strokeRect(x + 0.5, yy + 0.5, bw - 1, bh - 1);
+    ctx.fillStyle = "#241c14";
+    ctx.font = (bw < 72 ? "12px " : "14px ") + FONT;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(name, x + bw / 2, yy + bh / 2);
+    ctx.restore();
+    if (interactive && hit) sectionHits.push({ x, y: yy, w: bw, h: bh, room: hit.room, plan: hit.plan || "" });
+  }
+  function roomOpenAt(hit, at) {
+    if (hit.plan === "deep") return predDeep(at);
+    if (hit.plan === "low") return predLow(at) && roomIsOpen("east", at);
+    if (hit.room === "desk" || hit.room === "lamp") return true;
+    return roomIsOpen(hit.room, at);
+  }
+  const loftW = (inner - gap) / 2;
+  box(padL, 8, loftW, loftH, "抄写台", { room:"desk" });
+  box(padL + loftW + gap, 8, loftW, loftH, "灯室", { room:"lamp" });
+  cols.forEach((c, i) => {
+    const x = padL + i * (colW + gap);
+    const yTop = yOf(c.b);
+    const yBot = yOf(c.a);
+    box(x, yTop, colW, Math.max(18, yBot - yTop), c.name, { room: c.id });
+  });
+  const westX = padL;
+  box(westX + 4, yOf(100), colW - 8, Math.max(18, yOf(90) - yOf(100)), colW < 88 ? "深" : "深抽屉", { room:"west", plan:"deep" });
+  const eastX = padL + 3 * (colW + gap);
+  box(eastX + 4, yOf(10), colW - 8, Math.max(18, yOf(0) - yOf(10) - 2), colW < 88 ? "底" : "底层", { room:"east", plan:"low" });
+  ctx.strokeStyle = "#145e56";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(padL, waterY);
+  ctx.lineTo(w - padR, waterY);
+  ctx.stroke();
+  const tag = Math.round(info.level) + " 格 · " + (fallingSlow(mins) ? "落" : "涨");
+  ctx.font = "12px " + FONT;
+  const tw = ctx.measureText(tag).width;
+  const tx = Math.min(w - padR - tw - 6, Math.max(padL + 4, w - padR - tw - 8));
+  const ty = Math.max(top + 2, Math.min(bottom - 20, waterY - 20));
+  ctx.fillStyle = "rgba(243,231,210,.94)";
+  ctx.fillRect(tx - 4, ty, tw + 8, 16);
+  ctx.fillStyle = "#145e56";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillText(tag, tx, ty + 1);
+  ctx.fillStyle = "#8a7b68";
+  ctx.font = "11px " + FONT;
+  ctx.textBaseline = "alphabetic";
+  const cap = w < 560
+    ? clockOf(mins) + " · 线切过并发红的一档开着"
+    : clockOf(mins) + " · 水位线切过、发红的一档开着。北井还得是落潮。";
+  ctx.fillText(cap, padL, h - 8);
+}
+function drawSpark(canvas, minutes) {
+  const fitted = fitCanvas(canvas);
+  const ctx = fitted.ctx;
+  const w = fitted.w;
+  const h = fitted.h;
+  if (w < 20 || h < 20) return;
+  ctx.clearRect(0, 0, w, h);
+  ctx.beginPath();
+  for (let m = 0; m <= DAY; m += 2) {
+    const lv = tideInfo(m).level;
+    const x = 6 + (m / DAY) * (w - 12);
+    const y = h - 8 - (lv / 100) * (h - 16);
+    if (m === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = "#d5e6e2";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  const x = 6 + (Math.min(minutes, DAY) / DAY) * (w - 12);
+  ctx.strokeStyle = "#e2b15a";
+  ctx.beginPath();
+  ctx.moveTo(x, 3);
+  ctx.lineTo(x, h - 3);
+  ctx.stroke();
+}
+function paint(time) {
+  const now = REDUCE || state.started ? state.minutes : ((time / 80000) * DAY) % DAY;
+  const wave = REDUCE ? 0 : time;
+  const section = document.getElementById("section");
+  if (section) drawSection(section, now, wave, state.started && state.room === "lamp");
+  const spark = document.getElementById("spark");
+  if (spark) drawSpark(spark, state.minutes);
+}
+function kickDraw() {
+  cancelAnimationFrame(rafId);
+  if (REDUCE) { paint(0); return; }
+  const step = (t) => { paint(t); rafId = requestAnimationFrame(step); };
+  rafId = requestAnimationFrame(step);
+}
+
+function renderTitle() {
+  document.getElementById("app").innerHTML = "<div class=\"title-screen\"><div class=\"chart-frame\"><canvas id=\"section\" aria-label=\"这一夜的潮汐剖面，正在自己演示\"></canvas></div><article class=\"card\"><p class=\"eyebrow\">未寄出的第七封</p><h1>潮汐抄写室</h1><p>今夜你是值班的抄写员。</p><p>前一任把钥匙留在门下，字条还是湿的：「第七封被拆散了。真页混在别夜冲回来的废页里。黎明之前拼回去，放进码头第三级台阶下的铁盒。」</p><p>潮从现在退到半夜，再涨回天亮。有的走廊只在某一段水位才进得去。灯室有整晚的表。桌上的三律是唯一的规矩。</p><button class=\"primary big\" data-act=\"start\">开始值班</button><p class=\"muted\">这张图先把这一夜走给你看。进门之后，潮按真实的时辰走。大约三十分钟到一小时，看你怎么抄。</p></article></div>";
+  paint(performance.now());
+  kickDraw();
+}
+function endingHTML() {
+  const success = state.ended === "seal" || state.ended === "dawn-ok";
+  const when = clockOf(state.minutes);
+  const secret = secretLine();
+  const rev = Array.from(secret).reverse().join("");
+  let body = "";
+  if (success) {
+    const acro = state.letter.map((id) => esc(slip(id).first)).join("<br>");
+    const lines = state.letter.map((id) => "<p class=\"line\">" + esc(slip(id).text) + "</p>").join("");
+    const coda = state.ended === "seal"
+      ? "<p>你在 " + when + " 把第八行按上。花押「缄」压住纸角的时候，灯油还剩一圈。</p><p>八个首字连起来，是一句你整晚都坐在里面的话。</p><p>你带着信走到码头。潮还没有涨到铁链。第三级台阶下的铁盒是干的，盖上的盐壳在合拢时裂了一声。盒底反刻着「" + esc(rev) + "」。正过来，就是藏头那一句。</p>"
+      : "<p>六点的水已经贴着窗台。你把最后一行按实，蜡印是歪的，花押却确实是「缄」。</p><p>你淌到第三级台阶。铁盒还差一寸没被淹没。盒底反刻着「" + esc(rev) + "」，和藏头是同一句，只是被人反过来刻进了木头里。</p>";
+    body = "<div class=\"ending-layout\"><div>" + lines + "</div><p class=\"acro\">" + acro + "</p></div><p class=\"eyebrow\">藏头一行</p><p>" + esc(secret) + "</p><div class=\"coda\">" + coda + "</div>";
+  } else {
+    const lines = state.letter.length
+      ? state.letter.map((id) => "<p class=\"line\">" + esc(slip(id).text) + "</p>").join("")
+      : "<p>页匣里的纸没有排进信笺。</p>";
+    body = lines + "<div class=\"coda\"><p>" + when + "，潮漫过窗台。抄写台上的散页浮起一角。</p><p>你没有能封上的信。花押没有走到该停的地方。</p><p>你用镇纸压住它们，在潮汐表旁边留了一句铅笔字：北井的时间不要让给别人。</p></div>";
+  }
+  const title = success ? "第七封" : "没有封上";
+  return "<div class=\"ending-wrap\"><article class=\"ending\"><p class=\"eyebrow\">" + when + "</p><h1>" + title + "</h1>" + body + "<div class=\"rowbtns\"><button class=\"primary\" data-act=\"again\">再值一夜</button></div></article></div>";
+}
+function render(opts) {
+  const y = opts && opts.top ? 0 : window.scrollY;
+  const app = document.getElementById("app");
+  if (!state.started) {
+    renderTitle();
+    return;
+  }
+  if (state.ended) {
+    app.innerHTML = endingHTML();
+    syncAudio();
+    cancelAnimationFrame(rafId);
+    return;
+  }
+  app.innerHTML = "<div class=\"shell\">" + headerHTML() + "<div class=\"log\">" + state.log.slice(-3).map((l) => "<span>" + esc(l) + "</span>").join("") + "</div><aside class=\"col nav\">" + navHTML() + "</aside><main class=\"col stage\">" + stageHTML() + "</main><aside class=\"col letter\" id=\"letter\">" + letterColumn() + "</aside>" + overlay() + "</div>";
+  paint(performance.now());
+  kickDraw();
+  syncAudio();
+  window.scrollTo(0, y);
+}
+function onClick(e) {
+  const el = e.target.closest("[data-act]");
+  if (!el || !document.getElementById("app").contains(el)) return;
+  const act = el.dataset.act;
+  if (act === "stop") return;
+  if (act === "start") { startNew(); return; }
+  if (act === "audio") { toggleAudio(); return; }
+  if (act === "manual") { state.modal = null; state.manual = true; render(); return; }
+  if (act === "close-manual") { state.manual = false; render(); return; }
+  if (act === "abandon") { requestAbandon(); return; }
+  if (act === "again") { abandon(); return; }
+  if (act === "modal-no") { state.modal = null; render(); return; }
+  if (act === "modal-yes") {
+    const modal = state.modal;
+    if (!modal) return;
+    if (modal.kind === "plan") requestPlan(modal.key, true);
+    else if (modal.kind === "wait") waitTo(modal.target);
+    else if (modal.kind === "abandon") abandon();
+    return;
+  }
+  if (state.ended) return;
+  if (act === "travel") { tryTravel(el.dataset.room); return; }
+  if (act === "plan") { requestPlan(el.dataset.plan, false); return; }
+  if (act === "copy") { copySlip(el.dataset.id); return; }
+  if (act === "wait") { requestWait(Number(el.dataset.min)); return; }
+  if (act === "add") { addToLetter(el.dataset.id); return; }
+  if (act === "up") { moveLetter(Number(el.dataset.i), -1); return; }
+  if (act === "down") { moveLetter(Number(el.dataset.i), 1); return; }
+  if (act === "pull") { pullLetter(Number(el.dataset.i)); return; }
+  if (act === "seal") { trySeal(); return; }
+  if (act === "hint") { takeHint(); return; }
+  if (act === "sort") { cycleSort(); return; }
+}
+document.getElementById("app").addEventListener("click", (e) => {
+  const canvas = e.target.closest && e.target.id === "section" ? e.target : null;
+  if (canvas && sectionLive) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const hit = sectionHits.slice().reverse().find((h) => x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h);
+    if (hit) {
+      if (hit.plan) requestPlan(hit.plan, false);
+      else tryTravel(hit.room);
+    }
+    return;
+  }
+  onClick(e);
+});
+
+function sealChains() {
+  const found = [];
+  function dfs(path) {
+    if (path.length === 8) {
+      if (judge(path).ok) found.push(path.slice());
+      return;
+    }
+    const need = path.length ? slip(path[path.length - 1]).seal : null;
+    for (const s of SLIPS) {
+      if (path.includes(s.id)) continue;
+      if (need != null && s.first !== need) continue;
+      path.push(s.id);
+      dfs(path);
+      path.pop();
+    }
+  }
+  for (const s of SLIPS) dfs([s.id]);
+  return found;
+}
+function audit() {
+  const problems = [];
+  SLIPS.forEach((s) => { if (s.text[0] !== s.first) problems.push("first " + s.id); });
+  if (!judge(TRUE_IDS).ok) problems.push("true chain fails");
+  SLIPS.forEach((s) => {
+    if (s.realTide) return;
+    const diff = Math.abs(Math.round(levelAtHour(s.hour)) - s.level);
+    if (diff <= TOL) problems.push("fake close " + s.id + " " + diff);
+  });
+  const chains = sealChains();
+  if (chains.length !== 1) problems.push("chains " + chains.length);
+  else if (chains[0].join() !== TRUE_IDS.join()) problems.push("chain mismatch " + chains[0].join());
+  return problems;
+}
+
+const existing = loadSave();
+if (existing) Object.assign(state, existing, { modal: null, manual: false });
+render();
+
+window.__tide = {
+  get state() { return state; },
+  SLIPS, TRUE_IDS, tideInfo, roomIsOpen, judge, audit, sealChains, secretLine,
+  tryTravel, copySlip, requestPlan, arrivalPlan, placeSpec, clockOf, startNew,
+  waitTo, slipAvailable, predDeep, predLow, shownLevel, levelAtHour
+};
+</script>
+</body>
+</html>

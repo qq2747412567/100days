@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>墨分五色</title>
+<meta name="description" content="一张会喝水的宣纸。焦、浓、重、淡、清随纸纹渗开，晾干才定住。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect fill='%231a1410' width='16' height='16'/%3E%3Cpath d='M8 2c2 3 4 4 4 7a4 4 0 1 1-8 0c0-3 2-4 4-7z' fill='%23140e0c'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --desk: #1a1410;
+    --lacquer: #2a221b;
+    --lacquer-2: #382e25;
+    --line: #5a4a38;
+    --paper: #f3ead8;
+    --ink: #241910;
+    --muted: #8d7b66;
+    --cinnabar: #9c3b32;
+    --cinnabar-deep: #7c2d27;
+    --foam: #f7f1e6;
+    --serif: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "PMingLiU", "SimSun", "WenQuanYi Micro Hei", "Droid Sans Fallback", serif;
+    --sans: "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", "WenQuanYi Micro Hei", "Droid Sans Fallback", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    color: var(--foam);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    background:
+      radial-gradient(1100px 520px at 50% -10%, #3c3026 0%, transparent 58%),
+      var(--desk);
+  }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--cinnabar); outline-offset: 2px; }
+  h1, h2, legend { font-family: var(--serif); font-weight: 500; }
+  h1 { font-size: 40px; letter-spacing: 0.18em; margin: 0; }
+  p { margin: 0; }
+  .top {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 22px;
+    align-items: end;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 26px 22px 8px;
+  }
+  .eyebrow {
+    margin: 0 0 4px;
+    letter-spacing: 0.22em;
+    font-size: 13px;
+    color: #e0b2a4;
+  }
+  .lede { max-width: 36em; color: #e6d8c4; padding-bottom: 6px; }
+  .date-line {
+    margin: 0;
+    letter-spacing: 0.14em;
+    color: #cbb89a;
+    font-family: var(--serif);
+    padding-bottom: 8px;
+    white-space: nowrap;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 232px minmax(280px, 640px) 300px;
+    gap: 18px;
+    justify-content: center;
+    align-items: start;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 12px 18px 48px;
+  }
+  .tray, .note {
+    border: 1px solid var(--line);
+  }
+  .tray {
+    background: linear-gradient(180deg, var(--lacquer-2), var(--lacquer));
+    padding: 12px 12px 16px;
+  }
+  fieldset {
+    border: 0;
+    margin: 0 0 12px;
+    padding: 0;
+  }
+  legend {
+    letter-spacing: 0.16em;
+    font-size: 15px;
+    padding: 0;
+    margin-bottom: 6px;
+  }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px; }
+  .choice {
+    background: transparent;
+    color: var(--foam);
+    border: 1px solid var(--line);
+    min-height: 36px;
+    padding: 6px 8px;
+    line-height: 1.2;
+  }
+  .choice small {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0;
+    font-family: var(--sans);
+  }
+  .choice[aria-pressed="true"] {
+    background: var(--cinnabar);
+    border-color: var(--cinnabar);
+    color: #fff8f2;
+  }
+  .choice[aria-pressed="true"] small { color: #f3d2cb; }
+  .choice.pig { display: inline-flex; align-items: center; gap: 6px; }
+  .choice.tone { position: relative; padding-left: 22px; }
+  .choice.tone::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    transform: translateY(-50%);
+    background: var(--swatch, #111);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35);
+  }
+  .choice.pig::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--swatch, #111);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35);
+    flex: 0 0 auto;
+  }
+  .slider { margin: 0 0 10px; }
+  .slider label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+  .slider output { color: #f0d2a8; font-variant-numeric: tabular-nums; }
+  input[type="range"] { width: 100%; accent-color: var(--cinnabar); }
+  .check {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 14px;
+    color: #e6d8c4;
+  }
+  .stage { display: flex; justify-content: center; }
+  .mat {
+    width: min(680px, 100%);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: stretch;
+  }
+  .spine {
+    writing-mode: vertical-rl;
+    letter-spacing: 0.42em;
+    font-family: var(--serif);
+    font-size: 15px;
+    color: #d9c7aa;
+    text-align: center;
+    padding: 8px 0;
+  }
+  .sheet {
+    position: relative;
+    background: #c9b48f;
+    padding: 12px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .28),
+      0 24px 50px rgba(0, 0, 0, .42);
+  }
+  #paper {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #efe3cc;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .hint {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 26px;
+    text-align: center;
+    color: rgba(70, 48, 28, .62);
+    letter-spacing: 0.12em;
+    pointer-events: none;
+    font-family: var(--serif);
+  }
+  #cursor {
+    position: fixed;
+    display: none;
+    border: 1px solid rgba(36, 22, 12, .6);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 30;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: multiply;
+  }
+  .note {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, .45), transparent 80px),
+      var(--paper);
+    color: var(--ink);
+    padding: 16px 16px 18px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, .28);
+  }
+  .note h2 { font-size: 20px; letter-spacing: 0.14em; margin: 0 0 8px; }
+  .status { min-height: 3.2em; color: #5c4e40; font-size: 14px; }
+  .meter {
+    height: 6px;
+    background: #e2d5bf;
+    margin: 6px 0 14px;
+  }
+  .meter span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: #3d6f86;
+  }
+  .note label { display: grid; gap: 4px; font-size: 13px; margin: 0 0 8px; }
+  .note input, .note select {
+    width: 100%;
+    background: var(--foam);
+    color: var(--ink);
+    border: 1px solid #cbbda6;
+    padding: 7px 8px;
+    min-height: 36px;
+  }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; }
+  .actions button, .ask-actions button {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    min-height: 38px;
+    padding: 6px 10px;
+  }
+  .actions button:hover, .ask-actions button:hover { background: var(--ink); color: var(--paper); }
+  button.primary { background: var(--cinnabar); color: #fff8f2; border-color: var(--cinnabar); }
+  button.primary:hover { background: var(--cinnabar-deep); color: #fff8f2; }
+  button[aria-pressed="true"].dry {
+    background: #3d6f86;
+    border-color: #3d6f86;
+    color: #f4fbff;
+  }
+  button:disabled { opacity: 0.4; cursor: default; }
+  button:disabled:hover { background: transparent; color: inherit; }
+  .essay { font-size: 14px; color: #3f342b; }
+  .essay p + p { margin-top: 8px; }
+  .keys { margin-top: 10px; color: #6d5e50; font-size: 13px; }
+  dialog {
+    border: none;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 18px 18px 16px;
+    max-width: min(360px, calc(100vw - 32px));
+  }
+  dialog::backdrop { background: rgba(18, 10, 6, .55); }
+  dialog p { margin-bottom: 14px; }
+  .ask-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  @media (max-width: 1080px) {
+    .top { grid-template-columns: 1fr; gap: 8px; }
+    .layout { grid-template-columns: 1fr; }
+    .tray { position: sticky; top: 0; z-index: 5; }
+    .mat { margin: 0 auto; }
+  }
+  @media print {
+    body { background: white; }
+    .top, .tray, .note, .spine, .hint, #cursor { display: none !important; }
+    .layout { display: block; padding: 0; }
+    .sheet { box-shadow: none; padding: 0; background: white; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <p class="eyebrow">一百天私物 · 第三日</p>
+    <h1>墨分五色</h1>
+  </div>
+  <p class="lede">一张会喝水的纸。焦、浓、重、淡、清，是水里带着多少墨，不是五个死颜色。</p>
+  <p class="date-line" id="date-line"></p>
+</header>
+<div class="layout">
+  <form class="tray" id="tray" autocomplete="off">
+    <fieldset>
+      <legend>笔</legend>
+      <div class="choices" id="brushes">
+        <button type="button" class="choice" data-brush="zhong" aria-pressed="true" title="圆正，含墨匀（1）">中锋</button>
+        <button type="button" class="choice" data-brush="ce" title="一边实，一边虚（2）">侧锋</button>
+        <button type="button" class="choice" data-brush="ku" title="水少，纸纹擦出来（3）">枯笔</button>
+        <button type="button" class="choice" data-brush="tai" title="散成小点（4）">点苔</button>
+        <button type="button" class="choice" data-brush="po" title="水大，形状会跑（5）">泼墨</button>
+        <button type="button" class="choice" data-brush="shui" title="不调色，把未干的墨推开（6）">清水</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>墨</legend>
+      <div class="choices" id="tones">
+        <button type="button" class="choice tone" data-tone="jiao">焦</button>
+        <button type="button" class="choice tone" data-tone="nong" aria-pressed="true">浓</button>
+        <button type="button" class="choice tone" data-tone="zhongmo">重</button>
+        <button type="button" class="choice tone" data-tone="dan">淡</button>
+        <button type="button" class="choice tone" data-tone="qing">清</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>色</legend>
+      <div class="choices" id="pigments">
+        <button type="button" class="choice pig" data-pigment="songyan" aria-pressed="true">松烟</button>
+        <button type="button" class="choice pig" data-pigment="youyan">油烟</button>
+        <button type="button" class="choice pig" data-pigment="huaqing">花青</button>
+        <button type="button" class="choice pig" data-pigment="zheshi">赭石</button>
+        <button type="button" class="choice pig" data-pigment="zhusha">朱砂</button>
+        <button type="button" class="choice pig" data-pigment="tenghuang">藤黄</button>
+        <button type="button" class="choice pig" data-pigment="shilu">石绿</button>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>纸</legend>
+      <div class="choices" id="papers">
+        <button type="button" class="choice" data-paper="sheng" aria-pressed="true">生宣<small>吸得快</small></button>
+        <button type="button" class="choice" data-paper="shu">熟宣<small>停得住</small></button>
+        <button type="button" class="choice" data-paper="pi">皮纸<small>走得慢</small></button>
+      </div>
+    </fieldset>
+    <div class="slider">
+      <label for="size">笔锋 <output id="size-val">18</output></label>
+      <input id="size" type="range" min="8" max="42" value="18">
+    </div>
+    <div class="slider">
+      <label for="water">用水 <output id="water-val">1.00</output></label>
+      <input id="water" type="range" min="0.35" max="1.7" step="0.05" value="1">
+    </div>
+    <div class="slider">
+      <label for="wrist">腕力 <output id="wrist-val">0.90</output></label>
+      <input id="wrist" type="range" min="0.35" max="1.25" step="0.05" value="0.9">
+    </div>
+    <label class="check"><input id="show-wet" type="checkbox" checked>看出还没干的地方</label>
+  </form>
+  <main class="stage">
+    <div class="mat">
+      <div class="spine">夜桌 · 一纸</div>
+      <div class="sheet">
+        <canvas id="paper" width="600" height="860" role="application" aria-label="宣纸。按住拖动来运笔。"></canvas>
+        <p class="hint" id="hint">按住纸面，慢慢拖过去</p>
+      </div>
+    </div>
+  </main>
+  <aside class="note">
+    <h2>纸上</h2>
+    <p class="status" id="status" aria-live="polite">生宣还是干的。</p>
+    <div class="meter" aria-hidden="true"><span id="wetbar"></span></div>
+    <div class="actions">
+      <button type="button" id="btn-study" title="画一枝雨后竹，看水怎么走">试笔</button>
+      <button type="button" class="dry" id="btn-dry" aria-pressed="false">加速晾干</button>
+      <button type="button" id="btn-undo" disabled>撤销</button>
+      <button type="button" id="btn-redo" disabled>重做</button>
+      <button type="button" id="btn-clear">倒掉</button>
+      <button type="button" class="primary" id="btn-save">保存图片</button>
+    </div>
+    <label>题字 <input id="poem" maxlength="18" placeholder="夜来有雨"></label>
+    <div class="pair">
+      <label>署名 <input id="sign" maxlength="8" value="日课"></label>
+      <label>印文 <input id="seal" maxlength="4" value="未干"></label>
+    </div>
+    <div class="pair">
+      <label>印式
+        <select id="seal-style">
+          <option value="zhu">朱文</option>
+          <option value="bai">白文</option>
+        </select>
+      </label>
+      <label>位置
+        <select id="side">
+          <option value="right">右缘</option>
+          <option value="left">左缘</option>
+        </select>
+      </label>
+    </div>
+    <div class="actions">
+      <button type="button" id="btn-seal">钤印落款</button>
+    </div>
+    <div class="essay">
+      <p>每个小格记着两样东西：还没干的水，和已经吃进纤维的颜色。水往更干的邻格走，颜色被带着走，但总是慢半步，所以一笔的中间先浓，四周渗出一圈淡的。水少到托不住时，颜色落到干层里，再画就是另一层。</p>
+      <p>生宣走得远，熟宣几乎停在笔下，皮纸在两者之间。未干时把花青和藤黄叠在一处，它们会在水里相遇。清水不调色，只把没干的墨推开；干透以后，它只能唤起薄薄一层。</p>
+      <p class="keys">1–6 换笔，［］改笔锋，- 与 = 改用水。Ctrl+Z 撤销，Ctrl+Y 重做，Ctrl+S 保存。鼠标走得慢，这一笔更重；压感笔认压力。</p>
+    </div>
+  </aside>
+</div>
+<div id="cursor"></div>
+<dialog id="ask">
+  <p id="ask-text"></p>
+  <div class="ask-actions">
+    <button type="button" id="ask-no">留下</button>
+    <button type="button" class="primary" id="ask-yes">继续</button>
+  </div>
+</dialog>
+<script src="ink.js"></script>
+</body>
+</html>

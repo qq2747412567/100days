@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>未登记的波段</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23143a16'/%3E%3Ccircle cx='8' cy='8' r='3' fill='%23b6ff7a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="radio.css">
+</head>
+<body>
+  <div class="room is-night" id="room">
+    <div class="window" aria-hidden="true">
+      <div class="rain"></div>
+      <div class="rain far"></div>
+    </div>
+    <header class="top">
+      <div>
+        <p class="eyebrow">澄湾 · 巷口第二间</p>
+        <h1>未登记的波段</h1>
+      </div>
+      <div class="clock" id="clock">——</div>
+    </header>
+
+    <main class="layout">
+      <section class="radio" id="radio" aria-label="巷口自制收音机">
+        <div class="face">
+          <div class="face-top">
+            <div class="plate">
+              <strong>巷口自制</strong>
+              <span>未登记 · 无出厂编号</span>
+            </div>
+            <div class="eye-box">
+              <div class="eye" id="eye" aria-hidden="true">
+                <div class="eye-green"></div>
+                <div class="eye-shadow" id="eyeShadow"></div>
+              </div>
+              <span>调谐眼</span>
+            </div>
+          </div>
+
+          <div class="scale" id="scale">
+            <div class="ticks" id="ticks"></div>
+            <div class="marks" id="marks"></div>
+            <div class="needle" id="needle"></div>
+            <div class="scale-glass"></div>
+          </div>
+
+          <div class="readout">
+            <div class="freq" id="freqRead">702.0</div>
+            <div class="readout-side">
+              <div class="unit-row">
+                <span id="unit">kHz</span>
+                <span class="band-pill" id="bandPill">中波</span>
+                <span class="fine-pill" id="finePill">微调 0.0</span>
+              </div>
+              <div class="lamps" id="lamps" aria-hidden="true"></div>
+              <div class="prop" id="propLine">电源未开</div>
+            </div>
+          </div>
+
+          <div class="mid">
+            <div class="paper" id="paper" aria-live="polite">
+              <div class="paper-head" id="paperHead">电源未开</div>
+              <div class="paper-body" id="paperBody">旋钮是凉的。按下电源，等灯丝热起来，再去拧。</div>
+              <div class="paper-foot" id="paperFoot"></div>
+              <div class="paper-actions" id="paperActions" hidden>
+                <button type="button" id="prevPara">上一段</button>
+                <button type="button" id="nextPara">下一段</button>
+                <button type="button" id="replay">从头再听</button>
+              </div>
+            </div>
+            <div class="speaker" aria-hidden="true">
+              <canvas id="speaker"></canvas>
+              <div class="grille"></div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="power-block">
+              <i class="pilot" id="pilot"></i>
+              <button type="button" class="switch power" id="powerBtn" aria-pressed="false">电源</button>
+            </div>
+            <div class="knob-wrap">
+              <button type="button" class="knob big" id="knobTune" aria-label="调谐"><i></i></button>
+              <span>调谐</span>
+            </div>
+            <div class="knob-wrap">
+              <button type="button" class="knob" id="knobFine" aria-label="微调"><i></i></button>
+              <span>微调</span>
+            </div>
+            <div class="knob-wrap">
+              <button type="button" class="knob" id="knobVol" aria-label="音量"><i></i></button>
+              <span>音量</span>
+            </div>
+            <div class="knob-wrap">
+              <button type="button" class="knob" id="knobTone" aria-label="音调"><i></i></button>
+              <span>音调</span>
+            </div>
+            <div class="knob-wrap">
+              <button type="button" class="knob" id="knobBw" aria-label="带宽"><i></i></button>
+              <span>带宽</span>
+            </div>
+            <div class="seg" role="group" aria-label="波段">
+              <button type="button" data-band="mw" class="is-on" id="btnMw">中波</button>
+              <button type="button" data-band="sw" id="btnSw">短波</button>
+            </div>
+            <div class="seg sky" role="group" aria-label="天色">
+              <button type="button" data-sky="auto" class="is-on" id="btnAuto">此刻</button>
+              <button type="button" data-sky="night" id="btnNight">入夜</button>
+              <button type="button" data-sky="day" id="btnDay">白天</button>
+            </div>
+          </div>
+        </div>
+        <p class="hint">方向键走一个频道，按住 Shift 走 1 kHz，逗号和句号做微调。↑↓ 音量。P 电源，B 换波段。在听音簿里打字时，这些键不拧收音机。玻璃上的铅笔印是周师傅点过的台。</p>
+      </section>
+
+      <aside class="book" aria-label="听音簿">
+        <h2>听音簿</h2>
+        <p class="book-lead">听稳大约两秒，这座台会自己落下来。备注只留在这台机器里。</p>
+        <div class="log" id="log"></div>
+        <div class="book-actions">
+          <button type="button" id="copyLog">抄成文本</button>
+          <button type="button" id="clearLog">清空</button>
+        </div>
+
+        <h3>书场抄下来的</h3>
+        <div class="heard" id="heard"></div>
+
+        <h3>压在玻璃下的旧频率表</h3>
+        <div class="table-wrap">
+          <table id="freqTable">
+            <thead>
+              <tr><th>频率</th><th>台</th><th>备注</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <h3>后盖里的半页</h3>
+        <p class="slip-note">据一九八三年《标准电码本（修订本）》抄下的几行。这半页上没有的字，译出来就是方框。</p>
+        <div class="slip" id="slip"></div>
+        <label class="decoder">
+          <span>把听到的四位码填在这里</span>
+          <textarea id="codeIn" rows="2" placeholder="例如 3390 6622 0037"></textarea>
+        </label>
+        <p class="decoded" id="decoded">译出的字会落在这里。</p>
+        <p class="morse-key">点划：1 ·————　2 ··———　3 ···——　4 ····—　5 ·····　6 —····　7 ——···　8 ———··　9 ————·　0 —————</p>
+      </aside>
+    </main>
+  </div>
+  <noscript>需要打开浏览器的 JavaScript，这台收音机才听得见。</noscript>
+  <script src="programs.js"></script>
+  <script src="radio.js"></script>
+</body>
+</html>
